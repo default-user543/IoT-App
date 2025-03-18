@@ -1,4 +1,5 @@
 # Please follow the structure following the comment to make the code clean!
+# The data according to this file will be saved in Firebase Authentication first (In fact because we haven't decided the origincal database for the app)
 from flask import Flask, jsonify, request
 import requests, json
 import re 
