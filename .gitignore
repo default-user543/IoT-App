@@ -1,2 +1,2 @@
 "__pycache__/\nenv/\n*.pyc\n*.pyo\n*.pyd\n.DS_Store" 
-env
+env/
