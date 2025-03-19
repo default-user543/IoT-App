@@ -3,7 +3,7 @@ import threading
 import os 
 
 def backend():
-    os.system('python backend/main.py')
+    os.system('python backend/main2.py')
 
 def frontend():
     os.system('python frontend/main.py')
