@@ -7,17 +7,14 @@ from firebase_admin import credentials, auth, initialize_app
 # This is the area for config information:
 app=Flask(__name__)
 authe="https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAFVY0tJ2mDjkmKZJ6MeO1JdeNBXDlpmAg"
-cred=credentials.Certificate(".json")
-initialize_app(cred)
 # The format of auth is: "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=<API_FIREBASE_AUTHENTICATION_KEYS>"
 # Team Backend nếu muốn chạy code thì có thể copy key API của Firebase Console vào phần <>.
 
-def check_email():
+def check_email(domain):
     try: 
         mx_check=dns.resolver.resolve(domain, 'MX')
-        a_check=dns.resolver.resolve(domain, 'A')
-        return len(mx_check) > 0 and len(a_check) > 0
-    except (dns.resolver.resolve.NXDOMAIN, dns.resolver.NoAnswer):
+        return len(mx_check) > 0
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
         return False
 @app.route('/sign-up', methods=['POST'])
 def signup():
@@ -37,11 +34,10 @@ def signup():
     if not any(char in string.punctuation for char in user.get('password')):
         return jsonify({'message': 'The password has to be have at least 1 special character!'})
     domain=email.split('@')[1]
-    domain=check_email(domain)
-    if not domain:
-        return jsonify({'message': 'Your domain isn't existed'})
+    if not check_email(domain):
+        return jsonify({'message': "Your domain isn't existed"})
     user={
-        'username': email,
+        'email': email,
         'password': password
     }
     user=requests.post(authe, json=user)
