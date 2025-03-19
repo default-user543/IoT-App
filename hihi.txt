@@ -3,7 +3,7 @@
 -Build Sign up:
     +Team Frontend sẽ gửi một json data method POST chứa 3 key: username, password, confirm_password
     +Backend sẽ xử lý và gửi về một json file có message và message sẽ lưu trữ thông tin có hợp lệ hay gặp lỗi.
-        +Ví dụ message có thể chứa "username không đủ dài" for example.
+        +Ví dụ message có thể chứa "password và confirm_password không khớp nhau" for example.
     +Team Frontend có thể hiển thị label để thông báo cho người dùng lỗi trên giao diện.
     => Nếu Team Frontend yêu cầu trả về thêm thông tin thì có thể thông báo cho team backend.
 
