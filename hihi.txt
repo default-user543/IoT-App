@@ -1,0 +1,12 @@
+-Build Sign up:
+    +Team Frontend sẽ gửi một json data method POST chứa 3 key: username, password, confirm_password
+    +Backend sẽ xử lý và gửi về một json file có message và message sẽ lưu trữ thông tin có hợp lệ hay gặp lỗi.
+        +Ví dụ message có thể chứa username không đủ dài for example.
+    +Team Frontend có thể hiển thị label để thông báo cho người dùng lỗi trên giao diện.
+    => Nếu Team Frontend yêu cầu trả về thêm thông tin thì có thể thông báo cho team backend.
+
+-Build Log in (Hiện tại chưa chốt database nên chưa build đầy đủ được nhưng tương tự Sign up)
+
+-Luật chung của username và password:
+    +password: Phải giống confirm_password, không ngắn dưới 6 ký tự, chứa ít nhất một ký tự đặc biệt.
+    +username: Dài từ 6-10 ký tự, có thể viết tiếng Việt, có thể chứa dấu cách, không chứa ký tự đặc biệt.
