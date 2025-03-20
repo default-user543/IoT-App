@@ -3,7 +3,7 @@ Frontend: Kivy
 Backend: Flask
 Phương thức mã hoá: hashed
 
-Tính năng sign up: http://127.0.0.1:5000/sign-up
+Tính năng sign up: http://127.0.0.1:5000/sign-up (Done)
     +Dữ liệu thô: Frontend sẽ gửi một file JSON gồm 3 keys: username, password, confirm_password cho phía backend xử lý qua route, method POST.
     +Các tính năng của sign up:
         +Kiểm tra xem username và password có hợp lệ không, kiểm tra xem password == confirm_password.
@@ -13,17 +13,17 @@ Tính năng sign up: http://127.0.0.1:5000/sign-up
         +Nếu gặp lỗi cụ thể sẽ trả về status 400
         +Nếu gặp thành công sẽ trả về status 200
 
-Tính năng log in: http://127.0.0.1:5000/login
+Tính năng log in: http://127.0.0.1:5000/login (Not done)
     +Dữ liệu thô: Frontend sẽ gửi một file JSON gồm 2 keys: username và password theo phương thức POST.
     +Các tính năng của log in: Người build log in. (Lưu ý: Password được lưu trên firebase đã được mã hoá theo hashed)
     +Dữ liệu trả về: Như sign up
 
-Tính năng thông tin cụ thể người dùng: http://127.0.0.1:5000/user-information
+Tính năng thông tin cụ thể người dùng: http://127.0.0.1:5000/user-information (Not done)
     +Dữ liệu thô: Frontend sẽ gửi một file JSON gồm các keys sau: full_name, favorite_character, birthday, favorite_animal, ...
     +Các tính năng của backend: Tạo một key forget_password bên trong unique_id và lưu các thông tin trên.
     +Dữ liệu trả về: Như sign up
 
-Tính năng khi người dùng quên mật khẩu: http://127.0.0.1:5000/huhu (Vì chúng ta muốn basic nên người dùng nhập đúng thông tin thì sẽ cho đặt lại mật khẩu)
+Tính năng khi người dùng quên mật khẩu: http://127.0.0.1:5000/huhu (Vì chúng ta muốn basic nên người dùng nhập đúng thông tin thì sẽ cho đặt lại mật khẩu) (Not done)
     +Dữ liệu thô: Frontend gửi một JSON gồm các keys như user-information.
     +Các tính năng của backend: Kiểm tra độ trùng khớp chiếu theo các thông tin được lưu ở user-information.
     +Dữ liệu trả về: Như sign up
