@@ -2,3 +2,7 @@ Các function chính của ứng dụng:
   +Chia sẻ thông tin vị trí các địa danh nổi tiếng (For example: Hồ con rùa có gì, địa đạo củ chi có gì).
   +Chia sẻ lộ trình đã đi.
   +Chia sẻ cảm nhận về địa danh này.
+
+-Phân tích dự án:
+  +Do tụi mình đang ở Việt Đức (Không phải là Hồ Con Rùa) nên tụi mình sẽ làm về các địa điểm ở trong trường như:
+    +Library, LH, ...
