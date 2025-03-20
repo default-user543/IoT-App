@@ -4,9 +4,12 @@ import requests, json
 import re, string
 import dns.resolver
 from firebase_admin import credentials, auth, initialize_app
+import bcrypt
 # This is the area for config information:
 app=Flask(__name__)
 authe="https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAFVY0tJ2mDjkmKZJ6MeO1JdeNBXDlpmAg"
+cred=credentials.Certificate('key.json')
+initialize_app(cred)
 # The format of auth is: "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=<API_FIREBASE_AUTHENTICATION_KEYS>"
 # Team Backend nếu muốn chạy code thì có thể copy key API của Firebase Console vào phần <>.
 
@@ -36,12 +39,14 @@ def signup():
     domain=email.split('@')[1]
     if not check_email(domain):
         return jsonify({'message': "Your domain isn't existed"})
+    salt=bcrypt.gensalt()
+    hashed_password=bcrypt.hashpw(password.encode('utf-8'), salt)
     user={
         'email': email,
-        'password': password
+        'password': hashed_password
     }
     user=requests.post(authe, json=user)
     return jsonify({'message': 'Sucessfully!'})
 
 if __name__=="__main__":
-    app.run(debug=True) 
+    app.run(ssl_context=('cert.pem', 'key.pem'), port=5000, debug=True)
