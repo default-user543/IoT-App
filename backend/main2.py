@@ -1,8 +1,15 @@
 from flask import Flask, jsonify, request
 import re
 import string
+from firebase_admin import credentials, initialize_app, db
+import bcrypt
 
 app = Flask(__name__)
+cred=credentials.Certificate('key.json')
+initialize_app(cred, {
+    'databaseURL': 'https://iot-project-863b1-default-rtdb.asia-southeast1.firebasedatabase.app/'
+})
+ref=db.reference('users')
 
 @app.route('/sign-up', methods=['POST'])
 def signup():
@@ -11,6 +18,15 @@ def signup():
     password = user.get('password')
     confirm_password = user.get('confirm_password')
 
+    all_users = ref.get()
+
+    if all_users==None:
+        all_users={}
+        
+    for key, user_data in all_users.items():
+        if user_data['username'] == username:
+            return jsonify({'message': 'Username is already existed!'})
+    
     if not username or not password or not confirm_password:
         return jsonify({'message': 'Please provide all the required information!'})
 
@@ -29,6 +45,20 @@ def signup():
     if not re.match(r"^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểẾỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰửữự ]+$", username):
         return jsonify({'message': 'The username cannot contain special characters!'})
 
+    salt=bcrypt.gensalt()
+    hashed_password=bcrypt.hashpw(password.encode('utf-8'), salt)
+    hashed_password=hashed_password.decode('utf-8')
+
+    user_data={
+        'username': username,
+        'password': hashed_password,
+        'GPS': {
+            'latitude': 0,
+            'longitude': 0
+        }
+    }
+
+    ref.push(user_data)
     return jsonify({'message': 'Successfully!'})
 
 if __name__ == "__main__":
