@@ -6,3 +6,5 @@ Các function chính của ứng dụng:
 -Phân tích dự án:
   +Do tụi mình đang ở Việt Đức (Không phải là Hồ Con Rùa) nên tụi mình sẽ làm về các địa điểm ở trong trường như:
     +Library, LH, ...
+
+-Phương pháp để thu thập GPS từ điện thoại lên máy chủ (Đang trong giai đoạn thử nghiệm): Kivy + KivyMD + Android Permissions
