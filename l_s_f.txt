@@ -19,7 +19,7 @@ Tính năng log in: http://127.0.0.1:5000/login (Not done)
     +Dữ liệu trả về: Như sign up
 
 Tính năng thông tin cụ thể người dùng: http://127.0.0.1:5000/user-information (Not done)
-    +Dữ liệu thô: Frontend sẽ gửi một file JSON gồm các keys sau: full_name, favorite_character, birthday, favorite_animal, ...
+    +Dữ liệu thô: Frontend sẽ gửi một file JSON gồm các keys sau: city, fav_colour, fav_pet, country, language.
     +Các tính năng của backend: Tạo một key forget_password bên trong unique_id và lưu các thông tin trên.
     +Dữ liệu trả về: Như sign up
 
