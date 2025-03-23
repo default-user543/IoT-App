@@ -55,11 +55,18 @@ def signup():
         'GPS': {
             'latitude': 0,
             'longitude': 0
+        },
+        'forget_password': {
+            'city': '',
+            'fav_color': '',
+            'fav_pet': '',
+            'country': '',
+            'language': '',
         }
     }
 
     ref.push(user_data)
-    return jsonify({'message': 'Successfully!'})
+    return jsonify({'message': 'Successfully!'}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
