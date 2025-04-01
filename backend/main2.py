@@ -11,6 +11,22 @@ initialize_app(cred, {
 })
 ref=db.reference('users')
 
+def check_name(username):
+    if not (6 <= len(username) <= 20):
+        return "The username must be between 6 and 20 characters."
+    if not re.match(r"^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểẾỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰửữự ]+$", username):
+        return "The username cannot contain special characters."
+    return None
+
+def check_password(password, confirm_password):
+    if password != confirm_password:
+        return "Password and confirm password do not match."
+    if len(password) <= 6:
+        return "Password must be longer than 6 characters."
+    if not any(char in string.punctuation for char in password):
+        return "Password must contain at least one special character."
+    return None
+
 @app.route('/sign-up', methods=['POST'])
 def signup():
     user = request.get_json()
@@ -18,33 +34,21 @@ def signup():
     password = user.get('password')
     confirm_password = user.get('confirm_password')
 
-    all_users = ref.get()
-
-    if all_users==None:
-        all_users={}
+    if not username or not password or not confirm_password:
+        return jsonify({'message': 'Please provide all the information!'})
+    all_users=ref.get() or {}
         
     for key, user_data in all_users.items():
         if user_data['username'] == username:
             return jsonify({'message': 'Username is already existed!'})
     
-    if not username or not password or not confirm_password:
-        return jsonify({'message': 'Please provide all the required information!'})
-
-    if password != confirm_password:
-        return jsonify({'message': 'Password and confirm password do not match!'})
-
-    if len(password) <= 6:
-        return jsonify({'message': 'Password must be longer than 6 characters!'})
-
-    if not any(char in string.punctuation for char in password):
-        return jsonify({'message': 'Password must contain at least one special character!'})
-
-    if not (6 <= len(username) <= 20):
-        return jsonify({'message': 'The username must be above 6 and below 20 characters!'})
+    message=check_name(username)
+    if message:
+        return jsonify({'message': message})
+    message=check_password(password, confirm_password)
+    if message:
+        return jsonify({'message': message})
     
-    if not re.match(r"^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểẾỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰửữự ]+$", username):
-        return jsonify({'message': 'The username cannot contain special characters!'})
-
     salt=bcrypt.gensalt()
     hashed_password=bcrypt.hashpw(password.encode('utf-8'), salt)
     hashed_password=hashed_password.decode('utf-8')
