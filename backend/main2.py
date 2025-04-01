@@ -3,6 +3,7 @@ import re
 import string
 from firebase_admin import credentials, initialize_app, db
 import bcrypt
+from math import radians, sin, cos, sqrt, atan2
 
 app = Flask(__name__)
 cred=credentials.Certificate('key.json')
@@ -11,14 +12,24 @@ initialize_app(cred, {
 })
 ref=db.reference('users')
 
-def check_name(username):
+def calculate_space(la1, lo1, la2, lo2): # To calculate the distance between user and the defined location, we use haversine formula:
+    R=6371000
+    phi1, phi2=radians(la1), radians(la2)
+    delta_phi=radians(la2-la1)
+    delta_lambda=radians(lo2-lo1)
+
+    a=sin(delta_phi/2)**2 + cos(phi1) * cos(phi2) * sin(delta_lambda/2)**2
+    c=2 * atan2(sqrt(a), sqrt(1-a))
+    return R * c
+
+def check_name(username): # This is the function to check the username data.
     if not (6 <= len(username) <= 20):
         return "The username must be between 6 and 20 characters."
     if not re.match(r"^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểẾỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰửữự ]+$", username):
         return "The username cannot contain special characters."
     return None
 
-def check_password(password, confirm_password):
+def check_password(password, confirm_password): # This is the function to check the password data.
     if password != confirm_password:
         return "Password and confirm password do not match."
     if len(password) <= 6:
