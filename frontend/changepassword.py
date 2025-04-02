@@ -13,14 +13,14 @@ from kivy.core.window import Window
 Window.clearcolor = (1, 1, 1, 1)  # Màu trắng
 
 # Màn hình hình ảnh đăng nhập
-class LoginImageScreen(Screen):
+class ChangepwImageScreen(Screen):
     def __init__(self, **kwargs):
-        super(LoginImageScreen, self).__init__(**kwargs)
+        super(ChangepwImageScreen, self).__init__(**kwargs)
 
         # Tạo layout chính với FloatLayout
         layout = FloatLayout()
 
-        # Thêm hình ảnh đăng nhập
+        # Thêm hình ảnh cho trang cp bằng ảnh đăng nhập
         login_image = Image(
             source='login.png',
             allow_stretch=True,  # Cho phép kéo dãn hình ảnh
@@ -39,43 +39,17 @@ class LoginImageScreen(Screen):
         )
 
         # Tạo khung nhập liệu cho "User's name"
-        username_input = self.create_rounded_input("User's name")
-        # Tạo khung nhập liệu cho "Password"
-        password_input = self.create_rounded_input("Password", password=True)
+        password_input = self.create_rounded_input("New Password")
+        # Tạo khung nhập liệu cho "Keyword"
+        confirm_password_input = self.create_rounded_input("Confirm Password")
 
         # Thêm các khung nhập liệu vào BoxLayout
-        input_layout.add_widget(username_input)
         input_layout.add_widget(password_input)
+        input_layout.add_widget(confirm_password_input)
 
-        # Thêm forget password
-        forget_password_label = Button(
-            text="Forget password?",
-            size_hint=(None, None),
-            size=(80, 40),
-            pos_hint={'center_x': 0.5, 'center_y': 0.3},
-            font_size='20sp',
-            background_color=(0, 0, 0, 0),  # Màu xám
-            background_normal='',
-            background_down='' 
-        )
-        forget_password_label.bind(on_press=self.go_to_forgetpassword_image)
-
-        # Thêm create account
-        create_account_label = Button(
-            text="Create account",
-            size_hint=(None, None),
-            size=(80, 40),
-            pos_hint={'center_x': 0.5, 'center_y': 0.2},
-            font_size='20sp',
-            background_color=(0, 0, 0, 0),  # Màu xám
-            background_normal='',
-            background_down='' 
-        )
-        create_account_label.bind(on_press=self.go_to_signin_image)
-
-        # Thêm nút "Back" để quay lại màn hình chính
-        back_button = Button(
-            text="Back",
+        # Thêm nút "Back" để quay lại trang login
+        submit_button = Button(
+            text="Submit",
             size_hint=(None, None),
             size=(100, 50),
             pos_hint={'center_x': 0.5, 'center_y': 0.1},
@@ -86,14 +60,12 @@ class LoginImageScreen(Screen):
         )
 
         # Thêm sự kiện khi nhấp vào nút "Back"
-        back_button.bind(on_press=self.go_back_to_main)
+        submit_button.bind(on_press=self.go_back_to_main)
 
         # Thêm các widget vào layout
         layout.add_widget(login_image)
         layout.add_widget(input_layout)
-        layout.add_widget(forget_password_label)
-        layout.add_widget(create_account_label)
-        layout.add_widget(back_button)
+        layout.add_widget(submit_button)
 
         # Thêm layout vào màn hình
         self.add_widget(layout)
@@ -141,62 +113,28 @@ class LoginImageScreen(Screen):
         instance.rect.size = instance.size
 
     def go_back_to_main(self, instance):
-        # Quay lại màn hình chính
+        # Quay lại màn hình main
         self.manager.current = 'main'
-
-    def go_to_forgetpassword_image(self, instance):
-        # Tới trang quên mật khẩu
-        self.manager.current = 'forgetpassword_image'
-
-    def go_to_signin_image(self, instance):
-        # Tới trang quên mật khẩu
-        self.manager.current = 'signin_image'
 
 
 
 # Màn hình đăng nhập
-class LoginScreen(Screen):
+class ChangepwScreen(Screen):
     def __init__(self, **kwargs):
-        super(LoginScreen, self).__init__(**kwargs)
+        super(ChangepwScreen, self).__init__(**kwargs)
 
         # Tạo layout chính với FloatLayout
         layout = FloatLayout()
 
         # Thêm label để hiển thị thông báo
         label = Label(
-            text="Welcome to Login Screen",
+            text="Forget Password?",
             font_size='24sp',
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
 
-        # Thêm forget password
-        forget_password_label = Button(
-            text="Back",
-            size_hint=(None, None),
-            size=(80, 40),
-            pos_hint={'center_x': 0.5, 'center_y': 0.3},
-            font_size='20sp',
-            background_color=(0, 0, 0, 0),  # Màu xám
-            background_normal='',
-            background_down=''
-        )
-        forget_password_label.bind(on_press=self.go_to_forget_password)
-
-        # Thêm create account
-        create_account_label = Button(
-            text="Create account",
-            size_hint=(None, None),
-            size=(80, 40),
-            pos_hint={'center_x': 0.5, 'center_y': 0.2},
-            font_size='20sp',
-            background_color=(0, 0, 0, 0),  # Màu xám
-            background_normal='',
-            background_down=''
-        )
-        create_account_label.bind(on_press=self.go_to_signin)
-
         # Thêm nút "Back" để quay lại màn hình chính
-        back_button = Button(
+        submit_button = Button(
             text="Back",
             size_hint=(None, None),
             size=(100, 50),
@@ -208,13 +146,11 @@ class LoginScreen(Screen):
         )
 
         # Thêm sự kiện khi nhấp vào nút "Back"
-        back_button.bind(on_press=self.go_back_to_main)
+        submit_button.bind(on_press=self.go_back_to_main)
 
         # Thêm các widget vào layout
         layout.add_widget(label)
-        layout.add_widget(forget_password_label)
-        layout.add_widget(create_account_label)
-        layout.add_widget(back_button)
+        layout.add_widget(submit_button)
 
         # Thêm layout vào màn hình
         self.add_widget(layout)
@@ -222,11 +158,3 @@ class LoginScreen(Screen):
     def go_back_to_main(self, instance):
         # Quay lại màn hình chính
         self.manager.current = 'main'
-
-    def go_to_forget_password(self, instance):
-        # Tới trang quên mật khẩu
-        self.manager.current = 'forgetpassword'
-
-    def go_to_signin(self, instance):
-        # Tới trang chính
-        self.manager.current = 'signin'

@@ -18,6 +18,10 @@ from login import LoginScreen
 from login import LoginImageScreen
 from signin import SignInScreen
 from signin import SignInImageScreen
+from forgetpassword import ForgetpwImageScreen
+from forgetpassword import ForgetpwScreen
+from changepassword import ChangepwImageScreen
+from changepassword import ChangepwScreen
 
 # Lớp chính của ứng dụng
 class MyApp(App):
@@ -44,6 +48,23 @@ class MyApp(App):
         # Thêm màn hình đăng ký
         signin_screen = SignInScreen(name='signin')
         screen_manager.add_widget(signin_screen)
+
+        # Thêm màn hình quên mật khẩu
+        forgetpw_screen = ForgetpwScreen(name='forgetpassword')
+        screen_manager.add_widget(forgetpw_screen)
+
+        # Thêm màn hình quên mật khẩu hình ảnh
+        forgetpw_image_screen = ForgetpwImageScreen(name='forgetpassword_image')
+        screen_manager.add_widget(forgetpw_image_screen)
+
+        # Thêm màn hình thay đổi mật khẩu
+        changepw_screen = ChangepwScreen(name='changepassword')
+        screen_manager.add_widget(changepw_screen)
+
+        # Thêm màn hình thay đổi mật khẩu hình ảnh
+        changepw_image_screen = ChangepwImageScreen(name='changepassword_image')
+        screen_manager.add_widget(changepw_image_screen)
+
 
         return screen_manager
 
