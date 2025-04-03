@@ -3,24 +3,18 @@ import re
 import string
 from firebase_admin import credentials, initialize_app, db
 import bcrypt
-from math import radians, sin, cos, sqrt, atan2
+from shapely.geometry import Point, Polygon
 
 app = Flask(__name__)
 cred=credentials.Certificate('key.json')
 initialize_app(cred, {
-    'databaseURL': 'https://iot-project-863b1-default-rtdb.asia-southeast1.firebasedatabase.app/'
+    'databaseURL': 'https://app-du-lich-4d8a4-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
-ref=db.reference('users')
 
-def calculate_space(la1, lo1, la2, lo2): # To calculate the distance between user and the defined location, we use haversine formula:
-    R=6371000
-    phi1, phi2=radians(la1), radians(la2)
-    delta_phi=radians(la2-la1)
-    delta_lambda=radians(lo2-lo1)
-
-    a=sin(delta_phi/2)**2 + cos(phi1) * cos(phi2) * sin(delta_lambda/2)**2
-    c=2 * atan2(sqrt(a), sqrt(1-a))
-    return R * c
+def check_location_algorithm(latitude, longitude, poly): # This is the function to check whether the user is in the location or not.
+    point = Point(latitude, longitude)
+    polygon = Polygon([(p['lat'], p['lng']) for p in poly])
+    return polygon.contains(point)
 
 def check_name(username): # This is the function to check the username data.
     if not (6 <= len(username) <= 20):
@@ -40,6 +34,7 @@ def check_password(password, confirm_password): # This is the function to check 
 
 @app.route('/sign-up', methods=['POST'])
 def signup():
+    ref=db.reference('users')
     user = request.get_json()
     username = user.get('username')
     password = user.get('password')
@@ -67,10 +62,6 @@ def signup():
     user_data={
         'username': username,
         'password': hashed_password,
-        'GPS': {
-            'latitude': 0,
-            'longitude': 0
-        },
         'forget_password': {
             'city': '',
             'fav_color': '',
@@ -82,6 +73,30 @@ def signup():
 
     ref.push(user_data)
     return jsonify({'message': 'Successfully!'}), 200
+
+@app.route('/check-location', methods=["POST"])
+def check_location():
+    data=request.get_json()
+    latitude=data['latitude']
+    longitude=data['longitude']
+
+    if not latitude or not longitude:
+        return jsonify({"message": "Cannot get the GPS of the user!"})
+    
+    ref = db.reference('zones')
+    zones = ref.get()
+
+    for zone_id, zone_data in zones.items():
+        polygon = zone_data['polygon']
+        if check_location_algorithm(latitude, longitude, polygon):
+            return jsonify({
+                "message": "Found zone successfully!",
+                "name": zone_data['name']
+            })
+    
+    return jsonify({
+        "message": "No zone found!"
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
