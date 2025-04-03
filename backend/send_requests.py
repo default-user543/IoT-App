@@ -1,11 +1,4 @@
-import requests
-import json 
+import requests, json 
 
-res = requests.post("http://127.0.0.1:5000/sign-up", json={
-    "username": "Lay Võ Đứ",
-    "password": "11111111@",
-    "confirm_password": "11111111@"
-})
-
-res = res.json()
-print(res.get('message'))
+response=requests.post("http://127.0.0.1:5000/check_location", json={"lat": 11.108313675344915, "lng": 106.6142607874415})
+print(response.json())

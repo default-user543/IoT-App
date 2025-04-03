@@ -90,7 +90,7 @@ def check_location():
         polygon = zone_data['polygon']
         if check_location_algorithm(latitude, longitude, polygon):
             return jsonify({
-                "message": "Found zone successfully!",
+                "message": "Sucessfully!",
                 "name": zone_data['name']
             })
     
