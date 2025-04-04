@@ -118,6 +118,3 @@ data={
         }
     }
 }
-
-ref=db.reference('/')
-ref.update(data)

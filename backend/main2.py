@@ -32,6 +32,14 @@ def check_password(password, confirm_password): # This is the function to check 
         return "Password must contain at least one special character."
     return None
 
+def find_user_by_username(username):
+    users_ref = db.reference('users')
+    all_users = users_ref.get() or {}
+    for key, user_data in all_users.items():
+        if user_data.get("username") == username:
+            return key, user_data
+    return None, None
+
 @app.route('/sign-up', methods=['POST'])
 def signup():
     ref=db.reference('users')
@@ -44,16 +52,15 @@ def signup():
         return jsonify({'message': 'Please provide all the information!'})
     all_users=ref.get() or {}
         
-    for key, user_data in all_users.items():
-        if user_data['username'] == username:
-            return jsonify({'message': 'Username is already existed!'})
-    
     message=check_name(username)
     if message:
         return jsonify({'message': message})
     message=check_password(password, confirm_password)
     if message:
         return jsonify({'message': message})
+    for key, user_data in all_users.items():
+        if user_data['username'] == username:
+            return jsonify({'message': 'Username is already existed!'})
     
     salt=bcrypt.gensalt()
     hashed_password=bcrypt.hashpw(password.encode('utf-8'), salt)
@@ -97,6 +104,32 @@ def check_location():
     return jsonify({
         "message": "No zone found!"
     })
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({"message": "Please provide all required fields!", "a": 6}), 400
+    message=check_name(username)
+    if message:
+        return jsonify({'message': message}), 400
+    message=check_password(password, password)
+    if message:
+        return jsonify({'message': message}), 400
+    
+    user_key, user_data = find_user_by_username(username)
+    if not user_data:
+        return jsonify({"message": "Account does not exist!", "a": 8}), 404
+
+    stored_password = user_data.get("password")
+    if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+        return jsonify({"message": "Incorrect password!", "a": 8}), 401
+
+    return jsonify({"message": "Login successful!", "a": 0}), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
