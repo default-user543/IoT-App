@@ -1,0 +1,2 @@
+Để chạy mỗi frontend thì chạy file run.py
+Nhấn vào design.jpg để xem thiết frontend

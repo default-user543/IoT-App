@@ -16,7 +16,6 @@ Window.clearcolor = (1, 1, 1, 1)  # Màu trắng
 class ChangepwImageScreen(Screen):
     def __init__(self, **kwargs):
         super(ChangepwImageScreen, self).__init__(**kwargs)
-
         # Tạo layout chính với FloatLayout
         layout = FloatLayout()
 
