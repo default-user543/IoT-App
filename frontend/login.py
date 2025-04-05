@@ -1,9 +1,10 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
-from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
+from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
 
 class LoginImageScreen(Screen):
@@ -13,7 +14,7 @@ class LoginImageScreen(Screen):
         # Tạo layout chính với FloatLayout
         layout = FloatLayout()
 
-        # Thêm hình ảnh đăng nhập (signin.png)
+        # Thêm hình ảnh đăng nhập
         login_image = Image(
             source='login.png',
             allow_stretch=True,
@@ -25,31 +26,55 @@ class LoginImageScreen(Screen):
         # Tạo BoxLayout để chứa các khung nhập liệu
         input_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(0.8, 0.3),  # Giảm chiều cao
-            pos_hint={'center_x': 0.5, 'center_y': 0.35},  
-            spacing=10,
+            size_hint=(0.8, 0.4),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            spacing=20,
             padding=[20, 20, 20, 20]
         )
 
-        # Tạo khung nhập liệu cho "Users name"
-        username_input = self.create_rounded_input("Username")
+        # Tạo khung nhập liệu cho "User's name"
+        username_input = self.create_rounded_input("User's name")
         # Tạo khung nhập liệu cho "Password"
         password_input = self.create_rounded_input("Password", password=True)
-        
-        # Nút "Forgot Password?"
-        forgot_password_button = self.create_rounded_button("Forgot Password?", self.on_forgot_password)
 
-        # Thêm các khung nhập vào BoxLayout
+        # Thêm các khung nhập liệu vào BoxLayout
         input_layout.add_widget(username_input)
         input_layout.add_widget(password_input)
-        input_layout.add_widget(forgot_password_button)
 
-        # Nút "Back"
+        # Thêm nút "Forget password?"
+        forget_password_label = Button(
+            text="Forget password?",
+            size_hint=(None, None),
+            size=(150, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.28},
+            font_size='20sp',
+            background_color=(0, 0, 0, 0),
+            color=(0.5, 0.5, 0.5, 1),
+            background_normal='',
+            background_down=''
+        )
+        forget_password_label.bind(on_press=self.go_to_forgetpassword_image)
+
+        # Thêm nút "Create account"
+        create_account_label = Button(
+            text="Create account",
+            size_hint=(None, None),
+            size=(150, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            font_size='20sp',
+            background_color=(0, 0, 0, 0),
+            color=(0.5, 0.5, 0.5, 1),
+            background_normal='',
+            background_down=''
+        )
+        create_account_label.bind(on_press=self.go_to_signin_image)
+
+        # Thêm nút "Back" để quay lại màn hình chính
         back_button = Button(
             text="Back",
             size_hint=(None, None),
             size=(100, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.1},  # Giữ nguyên vị trí
+            pos_hint={'center_x': 0.5, 'center_y': 0.1},
             font_size='20sp',
             background_color=(0.8, 0.8, 0.8, 1.0),
             background_normal='',
@@ -60,6 +85,8 @@ class LoginImageScreen(Screen):
         # Thêm các widget vào layout
         layout.add_widget(login_image)
         layout.add_widget(input_layout)
+        layout.add_widget(forget_password_label)
+        layout.add_widget(create_account_label)
         layout.add_widget(back_button)
 
         # Thêm layout vào màn hình
@@ -92,35 +119,6 @@ class LoginImageScreen(Screen):
         box.bind(pos=self.update_rect, size=self.update_rect)
         return box
 
-    def create_rounded_button(self, text, on_press_callback):
-        box = BoxLayout(
-            orientation='vertical',
-            size_hint=(1, None),
-            height=50,
-            padding=[10, 10, 10, 10]
-        )
-        with box.canvas.before:
-            Color(0.95, 0.95, 0.95, 1)
-            box.rect = RoundedRectangle(
-                pos=box.pos,
-                size=box.size,
-                radius=[10,]
-            )
-        button = Button(
-            text=text,
-            size_hint=(1, None),
-            height=40,
-            font_size='18sp',
-            background_color=(0, 0, 0, 0),
-            color=(0.3, 0.3, 0.3, 1),
-            background_normal='',
-            background_down=''
-        )
-        button.bind(on_press=on_press_callback)
-        box.add_widget(button)
-        box.bind(pos=self.update_rect, size=self.update_rect)
-        return box
-
     def update_rect(self, instance, value):
         instance.rect.pos = instance.pos
         instance.rect.size = instance.size
@@ -128,5 +126,10 @@ class LoginImageScreen(Screen):
     def go_back_to_main(self, instance):
         self.manager.current = 'main'
 
-    def on_forgot_password(self, instance):
-        self.manager.current = 'forgotpass'  #  Chuyển sang màn hình Forgot Password
+    def go_to_forgetpassword_image(self, instance):
+        # Điều hướng đến màn hình Forget Password Image
+        self.manager.current = 'forget_password_image'
+
+    def go_to_signin_image(self, instance):
+        # Điều hướng đến màn hình Sign In Image
+        self.manager.current = 'signin_image'
