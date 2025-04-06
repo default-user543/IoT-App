@@ -61,7 +61,34 @@
   -	Backend dùng phương thức hashed để mã hoá mật khẩu người dùng nhập vào và dùng thuật toán để thực hiện tính năng log in.
 + **Output data**: Backend trả về một file JSON như quy ước.
 
-+ ### Validation Rules:
+#### Tính năng thông tin cụ thể người dùng: http://127.0.0.1:5000/user-information (Not done)
++ **Input data**: Frontend sẽ gửi một file JSON theo methods POST như dưới:
+
+```json
+{
+  "username": "...",
+  "city": "...",
+  "fav_colour": "...",
+  "fav_pet": "...",
+  "country": "...",
+  "language": "..."
+}
+```
+
++ **Cách hoạt động**:
+  - Backend sẽ check xem thông tin nhập vào có hợp với luật hoặc thiếu không.
+  - Backend sẽ update các thông tin vào trong phần "forgot_password" trong Firebase Real-time Database.
++ **Output data**: Backend trả về một file JSON như quy ước.
+
+#### Tính năng khi người dùng quên mật khẩu: http://127.0.0.1:5000/forgot_password (Not done)
++ **Input data**: Frontend sẽ gửi file JSON giống như phần trên nhưng có thêm key resert_password.
++ **Cách thức hoạt động**:
+  - Backend sẽ check xem thông tin nhập vào có hợp với luật hoặc thiếu không.
+  - Backend sẽ xem xét xem các user-information có trùng khớp trong cơ sở dữ liệu không.
+  - Nếu trùng khớp thì mới đổi password của người dùng (Nhớ mã hoá theo phương thức hashed rồi mới up lên database)
++ **Output data**: Backend trả về một file JSON nhưu theo quy ước.
+
+### Validation Rules:
 - **Username**:
   - Must be between 6 and 20 characters.
   - Cannot contain special characters.
@@ -71,3 +98,26 @@
   - Must contain at least one special character.
 
 ---
+
+### Giai đoạn 2: Build tính năng liên quan đến GPS:
+
+#### Tính năng khi người dùng bước vào một vùng định sẵn thì thông báo: http://127.0.0.1:5000/check-location
++ **Input data**: Frontend sẽ gửi một file JSON chứa thông tin vị trí của người dùng như sau:
+
+```json
+{
+  "latitude": latitude,
+  "longitude": longitude
+}
+```
+
++ **Cách thức hoạt động**: Sử dụng các thuật toán liên quan đến Polygon-based để xác định vị trí của người dùng so với vùng polygon đã định sẵn trong database.
+
++ **Output data**: Backend trả về một file JSON như sau:
+
+```json
+{
+  "message": "Thông báo lỗi hoặc thành công",
+  "zone_name": "Tên của vùng mà người dùng bước vào"
+}
+```
