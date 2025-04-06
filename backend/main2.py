@@ -1,36 +1,42 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session, redirect, url_for
 import re
 import string
 from firebase_admin import credentials, initialize_app, db
 import bcrypt
 from shapely.geometry import Point, Polygon
+from flask_session import Session
 
 app = Flask(__name__)
-cred=credentials.Certificate('key.json')
+app.secret_key = "no_one_knows_this_secret_key"
+cred = credentials.Certificate('key.json')
 initialize_app(cred, {
     'databaseURL': 'https://app-du-lich-4d8a4-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
 
-def check_location_algorithm(latitude, longitude, poly): # This is the function to check whether the user is in the location or not.
+def check_location_algorithm(latitude, longitude, poly):
     point = Point(latitude, longitude)
     polygon = Polygon([(p['lat'], p['lng']) for p in poly])
     return polygon.contains(point)
 
-def check_name(username): # This is the function to check the username data.
+def check_name(username):
     if not (6 <= len(username) <= 20):
-        return "The username must be between 6 and 20 characters."
+        return "The username must be between 6 and 20 characters.", 1
     if not re.match(r"^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểẾỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰửữự ]+$", username):
-        return "The username cannot contain special characters."
-    return None
+        return "The username cannot contain special characters.", 2
+    return None, 0
 
-def check_password(password, confirm_password): # This is the function to check the password data.
-    if password != confirm_password:
-        return "Password and confirm password do not match."
+def check_password(password, confirm_password=None):
+    if confirm_password and password != confirm_password:
+        return "Password and confirm password do not match.", 3
     if len(password) <= 6:
-        return "Password must be longer than 6 characters."
+        return "Password must be longer than 6 characters.", 4
     if not any(char in string.punctuation for char in password):
-        return "Password must contain at least one special character."
-    return None
+        return "Password must contain at least one special character.", 5
+    return None, 0
+
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
 def find_user_by_username(username):
     users_ref = db.reference('users')
@@ -42,31 +48,30 @@ def find_user_by_username(username):
 
 @app.route('/sign-up', methods=['POST'])
 def signup():
-    ref=db.reference('users')
+    ref = db.reference('users')
     user = request.get_json()
     username = user.get('username')
     password = user.get('password')
     confirm_password = user.get('confirm_password')
 
     if not username or not password or not confirm_password:
-        return jsonify({'message': 'Please provide all the information!'})
-    all_users=ref.get() or {}
-        
-    message=check_name(username)
-    if message:
-        return jsonify({'message': message})
-    message=check_password(password, confirm_password)
-    if message:
-        return jsonify({'message': message})
+        return jsonify({'message': 'Please provide all the information!', 'a': 6}), 400
+
+    all_users = ref.get() or {}
     for key, user_data in all_users.items():
         if user_data['username'] == username:
-            return jsonify({'message': 'Username is already existed!'})
-    
-    salt=bcrypt.gensalt()
-    hashed_password=bcrypt.hashpw(password.encode('utf-8'), salt)
-    hashed_password=hashed_password.decode('utf-8')
+            return jsonify({'message': 'Username is already existed!', 'a': 7}), 400
 
-    user_data={
+    message, code = check_name(username)
+    if code != 0:
+        return jsonify({'message': message, 'a': code}), 400
+
+    message, code = check_password(password, confirm_password)
+    if code != 0:
+        return jsonify({'message': message, 'a': code}), 400
+
+    hashed_password = hash_password(password)
+    user_data = {
         'username': username,
         'password': hashed_password,
         'forget_password': {
@@ -79,17 +84,16 @@ def signup():
     }
 
     ref.push(user_data)
-    return jsonify({'message': 'Successfully!'}), 200
+    return jsonify({'message': 'Successfully!', 'a': 0}), 200
 
 @app.route('/check-location', methods=["POST"])
 def check_location():
-    data=request.get_json()
-    latitude=data['latitude']
-    longitude=data['longitude']
-
+    data = request.get_json()
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
     if not latitude or not longitude:
-        return jsonify({"message": "Cannot get the GPS of the user!"})
-    
+        return jsonify({"message": "Cannot get the GPS of the user!", "a": 6}), 400
+
     ref = db.reference('zones')
     zones = ref.get()
 
@@ -97,13 +101,15 @@ def check_location():
         polygon = zone_data['polygon']
         if check_location_algorithm(latitude, longitude, polygon):
             return jsonify({
-                "message": "Sucessfully!",
-                "name": zone_data['name']
-            })
-    
+                "message": "Found zone successfully!",
+                "name": zone_data['name'],
+                "a": 0
+            }), 200
+
     return jsonify({
-        "message": "No zone found!"
-    })
+        "message": "No zone found!",
+        "a": 8
+    }), 404
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -113,13 +119,7 @@ def login():
 
     if not username or not password:
         return jsonify({"message": "Please provide all required fields!", "a": 6}), 400
-    message=check_name(username)
-    if message:
-        return jsonify({'message': message}), 400
-    message=check_password(password, password)
-    if message:
-        return jsonify({'message': message}), 400
-    
+
     user_key, user_data = find_user_by_username(username)
     if not user_data:
         return jsonify({"message": "Account does not exist!", "a": 8}), 404
@@ -130,6 +130,82 @@ def login():
 
     return jsonify({"message": "Login successful!", "a": 0}), 200
 
+@app.route('/user-information', methods=['POST'])
+def user_information():
+    data = request.get_json()
+    required_fields = ["username", "city", "fav_colour", "fav_pet", "country", "language"]
+
+    if not all(field in data and data[field] for field in required_fields):
+        return jsonify({"message": "Missing required information!", "a": 6}), 400
+
+    message, code = check_name(data["username"])
+    if code != 0:
+        return jsonify({'message': message, 'a': code}), 400
+
+    users_ref = db.reference('users')
+    username = data["username"]
+    user_key, user_data = find_user_by_username(username)
+
+    if not user_data:
+        return jsonify({"message": "User not found!", "a": 8}), 404
+
+    users_ref.child(user_key).update({
+        "forget_password": {
+            "city": data["city"],
+            "fav_colour": data["fav_colour"],
+            "fav_pet": data["fav_pet"],
+            "country": data["country"],
+            "language": data["language"]
+        }
+    })
+
+    return jsonify({"message": "Information updated successfully!", "a": 0}), 200
+
+@app.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    required_fields = ["username", "city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
+
+    if not all(field in data and data[field] for field in required_fields):
+        return jsonify({"message": "Missing required information!", "a": 6}), 400
+
+    username = data["username"]
+    user_key, user_data = find_user_by_username(username)
+    users_ref = db.reference('users')
+
+    if not user_data:
+        return jsonify({"message": "User not found!", "a": 8}), 404
+
+    forgot_info = user_data.get("forget_password", {})
+    for field in ["city", "fav_colour", "fav_pet", "country", "language"]:
+        if forgot_info.get(field) != data.get(field):
+            return jsonify({"message": "Information does not match our records!", "a": 8}), 401
+
+    new_password = data["reset_password"]
+    message, code = check_password(new_password)
+    if code != 0:
+        return jsonify({'message': message, 'a': code}), 400
+
+    new_hashed = hash_password(new_password)
+    users_ref.child(user_key).update({"password": new_hashed})
+
+    return jsonify({"message": "Password reset successful!", "a": 0}), 200
+
+@app.route("/GPS-for-Saving", methods=["POST"])
+def GPS_for_Saving():
+    data= request.get_json()
+    user_id = data.get("user_id")
+    ref=db.reference(f'users/{user_id}/locations')
+    locations = ref.get()
+    if locations:
+        location=list(locations.values())
+        start_point=location[0]
+        end_point=location[-1]
+
+    return jsonify({
+        "start_point": start_point,
+        "end_point": end_point
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
