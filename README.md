@@ -33,6 +33,7 @@
   - 6 là chưa nhập đầy đủ thông tin
   - 7 là username đã tồn tại
   - 8 là user-information của người dùng nhập vào không trùng khớp với cơ sở dữ liệu nên sẽ không resert.
+  - 9 là người dùng chưa đăng nhập hoặc chưa đăng ký.
 #### Tính năng sign up: http://127.0.0.1:5000/sign-up (Done)
 + **Input data**: Frontend sẽ gửi một file JSON như bên dưới theo phương thức POST:
 
