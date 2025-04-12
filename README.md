@@ -67,7 +67,6 @@
 
 ```json
 {
-  "username": "...",
   "city": "...",
   "fav_colour": "...",
   "fav_pet": "...",
