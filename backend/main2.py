@@ -6,7 +6,6 @@ import bcrypt
 from shapely.geometry import Point, Polygon
 from flask_session import Session
 from datetime import timedelta
-from flask_session import Session 
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -17,7 +16,6 @@ initialize_app(cred, {
     'databaseURL': 'https://app-du-lich-4d8a4-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
 app.permanent_session_lifetime = timedelta(days=365)
-Session(app)
 
 def check_location_algorithm(latitude, longitude, poly):
     point = Point(latitude, longitude)
