@@ -1,6 +1,6 @@
-# File này dùng để khai báo các thư viện cần thiết cho project:
-flask
-kivy
-firebase_admin
-requests
-json
+Flask
+firebase-admin
+bcrypt
+shapely
+Flask-Session
+Flask-Cors
