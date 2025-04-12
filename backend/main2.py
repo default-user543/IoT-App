@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session, redirect, url_for
+from flask import Flask, jsonify, request, session
 import re
 import string
 from firebase_admin import credentials, initialize_app, db
@@ -86,7 +86,7 @@ def signup():
             'language': '',
         }
     }
-
+    session['username'] = username
     ref.push(user_data)
     return jsonify({'message': 'Successfully!', 'a': 0}), 200
 
@@ -169,7 +169,7 @@ def user_information():
 
     return jsonify({"message": "Information updated successfully!", "a": 0}), 200
 
-@app.route('/forgot_password', methods=['POST'])
+@app.route('/forgot-password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
     required_fields = ["username" ,"city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
