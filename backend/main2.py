@@ -5,13 +5,19 @@ from firebase_admin import credentials, initialize_app, db
 import bcrypt
 from shapely.geometry import Point, Polygon
 from flask_session import Session
+from datetime import timedelta
+from flask_session import Session 
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 app.secret_key = "no_one_knows_this_secret_key"
 cred = credentials.Certificate('key.json')
 initialize_app(cred, {
     'databaseURL': 'https://app-du-lich-4d8a4-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
+app.permanent_session_lifetime = timedelta(days=365)
+Session(app)
 
 def check_location_algorithm(latitude, longitude, poly):
     point = Point(latitude, longitude)
@@ -128,22 +134,26 @@ def login():
     if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
         return jsonify({"message": "Incorrect password!", "a": 8}), 401
 
+    session['username'] = username
+    session.permanent = True
     return jsonify({"message": "Login successful!", "a": 0}), 200
 
 @app.route('/user-information', methods=['POST'])
 def user_information():
     data = request.get_json()
-    required_fields = ["username", "city", "fav_colour", "fav_pet", "country", "language"]
+    if 'username' not in session:
+        return jsonify({"message": "Please login or sign up!"})
+    username=session['username']
+    required_fields = ["city", "fav_colour", "fav_pet", "country", "language"]
 
     if not all(field in data and data[field] for field in required_fields):
         return jsonify({"message": "Missing required information!", "a": 6}), 400
 
-    message, code = check_name(data["username"])
+    message, code = check_name(username)
     if code != 0:
         return jsonify({'message': message, 'a': code}), 400
 
     users_ref = db.reference('users')
-    username = data["username"]
     user_key, user_data = find_user_by_username(username)
 
     if not user_data:
@@ -164,7 +174,7 @@ def user_information():
 @app.route('/forgot_password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
-    required_fields = ["username", "city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
+    required_fields = ["username" ,"city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
 
     if not all(field in data and data[field] for field in required_fields):
         return jsonify({"message": "Missing required information!", "a": 6}), 400
@@ -191,21 +201,10 @@ def forgot_password():
 
     return jsonify({"message": "Password reset successful!", "a": 0}), 200
 
-@app.route("/GPS-for-Saving", methods=["POST"])
-def GPS_for_Saving():
-    data= request.get_json()
-    user_id = data.get("user_id")
-    ref=db.reference(f'users/{user_id}/locations')
-    locations = ref.get()
-    if locations:
-        location=list(locations.values())
-        start_point=location[0]
-        end_point=location[-1]
-
-    return jsonify({
-        "start_point": start_point,
-        "end_point": end_point
-    })
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logout successful!", "a": 0}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
