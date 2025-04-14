@@ -67,7 +67,6 @@
 
 ```json
 {
-  "username": "...",
   "city": "...",
   "fav_colour": "...",
   "fav_pet": "...",
@@ -120,5 +119,21 @@
 {
   "message": "Thông báo lỗi hoặc thành công",
   "zone_name": "Tên của vùng mà người dùng bước vào"
+}
+```
+
+---
+
+#### Tính năng chia sẻ lộ trình của người dùng: http://127.0.0.1:5000/share
++ **Input data**: Frontend gửi một method POST đến Backend Server.
++ **Cách thức hoạt động**: Frontend phải trả về hai thứ:
+  + Link Google Maps mà khi người dùng bấm vào hiện lộ trình theo điểm bắt đầu và điểm kết thúc.
+  + Các khu vực cụ thể mà người dùng đã đi qua.
++ **Output data**: Backend trả về một file JSON nhưu sau:
+
+```json
+{
+  "link": "...",
+  "areas": "Khu vực 1 -> Khu vực 2 -> Khu vực 3"
 }
 ```
