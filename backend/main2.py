@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, redirect, url_for
 import re
 import string
 from firebase_admin import credentials, initialize_app, db
@@ -6,6 +6,7 @@ import bcrypt
 from shapely.geometry import Point, Polygon
 from flask_session import Session
 from datetime import timedelta
+from flask_session import Session 
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -52,11 +53,11 @@ def find_user_by_username(username):
 
 @app.route('/sign-up', methods=['POST'])
 def signup():
-    ref = db.reference('users')
     user = request.get_json()
     username = user.get('username')
     password = user.get('password')
     confirm_password = user.get('confirm_password')
+    ref=db.reference('users')
 
     if not username or not password or not confirm_password:
         return jsonify({'message': 'Please provide all the information!', 'a': 6}), 400
@@ -74,6 +75,7 @@ def signup():
     if code != 0:
         return jsonify({'message': message, 'a': code}), 400
 
+    ref = db.reference(f'users/{username}')
     hashed_password = hash_password(password)
     user_data = {
         'username': username,
@@ -86,8 +88,9 @@ def signup():
             'language': '',
         }
     }
-    session['username'] = username
-    ref.push(user_data)
+    session['username']=username 
+    session.permanent = True
+    ref.update(user_data)
     return jsonify({'message': 'Successfully!', 'a': 0}), 200
 
 @app.route('/check-location', methods=["POST"])
@@ -95,6 +98,11 @@ def check_location():
     data = request.get_json()
     latitude = data.get('latitude')
     longitude = data.get('longitude')
+    timestamp = data.get('timestamp')
+
+    if "username" not in session:
+        return jsonify({'message': 'Please login or sign up first!'}), 400
+    username = session['username']
     if not latitude or not longitude:
         return jsonify({"message": "Cannot get the GPS of the user!", "a": 6}), 400
 
@@ -109,7 +117,12 @@ def check_location():
                 "name": zone_data['name'],
                 "a": 0
             }), 200
-
+    ref = db.reference(f"users/{username}/History_GPS")
+    ref.push({
+        "lat": latitude,
+        "lng": longitude,
+        "timestamp": timestamp
+    })
     return jsonify({
         "message": "No zone found!",
         "a": 8
@@ -151,7 +164,7 @@ def user_information():
     if code != 0:
         return jsonify({'message': message, 'a': code}), 400
 
-    users_ref = db.reference('users')
+    users_ref = db.reference(f'users')
     user_key, user_data = find_user_by_username(username)
 
     if not user_data:
@@ -172,12 +185,14 @@ def user_information():
 @app.route('/forgot-password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
-    required_fields = ["username" ,"city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
+    required_fields = ["city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
+    if "username" not in session:
+        return jsonify({"message": "Please login or sign up!"})
+    username = session['username']
 
     if not all(field in data and data[field] for field in required_fields):
         return jsonify({"message": "Missing required information!", "a": 6}), 400
-
-    username = data["username"]
+    
     user_key, user_data = find_user_by_username(username)
     users_ref = db.reference('users')
 
