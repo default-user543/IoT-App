@@ -112,6 +112,15 @@ def check_location():
     for zone_id, zone_data in zones.items():
         polygon = zone_data['polygon']
         if check_location_algorithm(latitude, longitude, polygon):
+            ########
+            ref = db.reference(f"users/{username}/History_GPS")
+            ref.push({
+                "lat": latitude,
+                "lng": longitude,
+                "timestamp": timestamp,
+                "zone": zone_data['name']
+            })
+            ####
             return jsonify({
                 "message": "Found zone successfully!",
                 "name": zone_data['name'],
@@ -121,7 +130,8 @@ def check_location():
     ref.push({
         "lat": latitude,
         "lng": longitude,
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "zone": "No zone"
     })
     return jsonify({
         "message": "No zone found!",
@@ -218,6 +228,25 @@ def forgot_password():
 def logout():
     session.clear()
     return jsonify({"message": "Logout successful!", "a": 0}), 200
+
+@app.route('/share', methods=['POST'])
+def share():
+    if "username" not in session:
+        return jsonify({"message": "Please login or sign up!", "a": 9})
+    username=session['username']
+    ref = db.reference(f"users/{username}/History_GPS")
+    areas = {'areas': []}
+    database = ref.get()
+    for key, data in database.items():
+        if not areas['areas'] or areas['areas'][-1] != data['zone']:
+            areas['areas'].append(data['zone'])
+    data = areas['areas']
+    result = ''
+    for i in range(len(data)):
+        result += data[i]
+        if i != len(data) - 1:
+            result += ' -> '
+    return jsonify({'areas': result})
 
 if __name__ == "__main__":
     app.run(debug=True)
