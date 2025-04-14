@@ -1,16 +1,10 @@
-from kivy.app import App
 from kivy.uix.screenmanager import Screen
-from kivy.uix.image import Image
-from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
-from kivy.core.window import Window
-
-# Thiết lập màu nền cho ứng dụng
-Window.clearcolor = (1, 1, 1, 1)  # Màu trắng
 
 class SignInImageScreen(Screen):
     def __init__(self, **kwargs):
@@ -19,7 +13,7 @@ class SignInImageScreen(Screen):
         # Tạo layout chính với FloatLayout
         layout = FloatLayout()
 
-        # Thêm hình ảnh đăng ký
+        # Thêm hình nền
         signin_image = Image(
             source='signin.png',
             allow_stretch=True,
@@ -29,62 +23,57 @@ class SignInImageScreen(Screen):
         )
 
         # Tạo BoxLayout để chứa các khung nhập liệu
-        self.input_layout = BoxLayout(
+        input_layout = BoxLayout(
             orientation='vertical',
-            size_hint=(0.8, 0.6),
+            size_hint=(0.8, 0.5),
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             spacing=20,
             padding=[20, 20, 20, 20]
         )
 
-        # Tạo khung nhập liệu
-        self.username_input = self.create_rounded_input("User name")
+        # Tạo khung nhập liệu cho "User's name"
+        self.username_input = self.create_rounded_input("User's name")
+        # Tạo khung nhập liệu cho "Password"
         self.password_input = self.create_rounded_input("Password", password=True)
-        self.confirm_password_input = self.create_rounded_input("Confirm password", password=True)
+        # Tạo khung nhập liệu cho "Confirm Password"
+        self.confirm_password_input = self.create_rounded_input("Confirm Password", password=True)
 
-        # Thêm các khung nhập liệu vào layout
-        self.input_layout.add_widget(self.username_input)
-        self.input_layout.add_widget(self.password_input)
-        self.input_layout.add_widget(self.confirm_password_input)
+        # Thêm các khung nhập liệu vào BoxLayout
+        input_layout.add_widget(self.username_input)
+        input_layout.add_widget(self.password_input)
+        input_layout.add_widget(self.confirm_password_input)
 
-        # Thêm Label để hiển thị thông báo lỗi
-        self.message_label = Label(
-            text="",
-            size_hint=(1, None),
-            height=30,
-            pos_hint={'center_x': 0.5, 'center_y': 0.25},
-            color=(1, 0, 0, 1)  # Màu đỏ cho lỗi
-        )
-        layout.add_widget(self.message_label)
-
-        # Nút Submit
-        submit_button = Button(
-            text="Submit",
+        # Thêm nút "Next"
+        next_button = Button(
+            text="Next",
             size_hint=(None, None),
-            size=(120, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.18},
+            size=(100, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.1},
             font_size='20sp',
             background_color=(0.8, 0.8, 0.8, 1.0),
-            color=(1, 1, 1, 1)
+            background_normal='',
+            background_down=''
         )
-        submit_button.bind(on_press=self.sign_up)
+        next_button.bind(on_press=self.validate_inputs)
 
-        # Nút "already have an account?"
+        # Thêm nút "Already have an account?"
         login_button = Button(
-            text="already have an account?",
+            text="Already have an account?",
             size_hint=(None, None),
             size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.1},
-            font_size='15sp',
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            font_size='20sp',
             background_color=(0, 0, 0, 0),
-            color=(0.5, 0.5, 0.5, 1)
+            color=(0.5, 0.5, 0.5, 1),
+            background_normal='',
+            background_down=''
         )
-        login_button.bind(on_press=self.go_back_to_login_image)
+        login_button.bind(on_press=self.go_to_login)
 
         # Thêm các widget vào layout
         layout.add_widget(signin_image)
-        layout.add_widget(self.input_layout)
-        layout.add_widget(submit_button)
+        layout.add_widget(input_layout)
+        layout.add_widget(next_button)
         layout.add_widget(login_button)
 
         # Thêm layout vào màn hình
@@ -121,25 +110,35 @@ class SignInImageScreen(Screen):
         instance.rect.pos = instance.pos
         instance.rect.size = instance.size
 
-    def go_back_to_login_image(self, instance):
-        self.manager.current = 'login_image'
-
-    def sign_up(self, instance):
+    def validate_inputs(self, instance):
+        """Kiểm tra đầu vào và hiển thị lỗi nếu cần."""
         username = self.username_input.children[0].text.strip()
         password = self.password_input.children[0].text.strip()
         confirm_password = self.confirm_password_input.children[0].text.strip()
 
-        # Reset error message
-        self.message_label.text = ""
-
-        if not username or not password or not confirm_password:
-            self.message_label.text = "Please fill in all fields!"
+        # Kiểm tra nếu các trường bị bỏ trống
+        if not username:
+            self.username_input.children[0].hint_text = "Please fill in this box"
+            self.username_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+        if not password:
+            self.password_input.children[0].hint_text = "Please fill in this box"
+            self.password_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+        if not confirm_password:
+            self.confirm_password_input.children[0].hint_text = "Please fill in this box"
+            self.confirm_password_input.children[0].hint_text_color = (1, 0, 0, 1)
             return
 
+        # Kiểm tra nếu mật khẩu không khớp
         if password != confirm_password:
-            self.message_label.text = "Passwords do not match!"
+            self.confirm_password_input.children[0].hint_text = "Confirm wrong"
+            self.confirm_password_input.children[0].hint_text_color = (1, 0, 0, 1)
             return
 
-        # Nếu tất cả thông tin hợp lệ
-        self.message_label.color = (0, 1, 0, 1)  # Màu xanh cho thành công
-        self.message_label.text = "Sign up successful!"
+        # Nếu hợp lệ, chuyển sang màn hình confirm
+        self.manager.current = 'confirm'
+
+    def go_to_login(self, instance):
+        """Chuyển sang màn hình login."""
+        self.manager.current = 'login_image'

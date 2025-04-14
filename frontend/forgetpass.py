@@ -4,6 +4,7 @@ from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.dropdown import DropDown
 from kivy.graphics import Color, RoundedRectangle
 from kivy.core.window import Window
 
@@ -36,14 +37,35 @@ class ForgetpwImageScreen(Screen):
             padding=[20, 20, 20, 20]
         )
 
-        # Add input fields
-        self.username_input = self.create_rounded_input("User's name")
-        self.question_input = self.create_rounded_input("Question")
-        self.answer_input = self.create_rounded_input("Answer")
+        # Add dropdown for "Question"
+        self.dropdown = DropDown()
+        questions = ["Your favourite pet", "Your favourite colour", "The city where you live"]
+        for question in questions:
+            btn = Button(
+                text=question,
+                size_hint_y=None,
+                height=44,
+                background_normal='',  # Loại bỏ hình nền mặc định
+                background_color=(1, 1, 1, 1),  # Nền trắng
+                color=(0, 0, 0, 1)  # Chữ đen
+            )
+            btn.bind(on_release=lambda btn: self.select_question(btn.text))
+            self.dropdown.add_widget(btn)
 
-        # Add input fields to layout
-        self.input_layout.add_widget(self.username_input)
-        self.input_layout.add_widget(self.question_input)
+        # Button to display dropdown
+        self.question_button = Button(
+            text="Choose a security question",
+            size_hint=(1, None),
+            height=50,
+            background_normal='',  # Loại bỏ hình nền mặc định
+            background_color=(1, 1, 1, 1),  # Nền trắng
+            color=(0, 0, 0, 1)  # Chữ đen
+        )
+        self.question_button.bind(on_release=self.dropdown.open)
+        self.input_layout.add_widget(self.question_button)
+
+        # Add input field for "Answer"
+        self.answer_input = self.create_rounded_input("Answer")
         self.input_layout.add_widget(self.answer_input)
 
         # Add "Submit" button
@@ -116,21 +138,20 @@ class ForgetpwImageScreen(Screen):
         instance.rect.pos = instance.pos
         instance.rect.size = instance.size
 
+    def select_question(self, question):
+        self.question_button.text = question
+        self.dropdown.dismiss()
+
     def validate_inputs(self, instance):
         # Check if inputs are empty and show error if needed
-        username = self.username_input.children[0]
-        question = self.question_input.children[0]
+        selected_question = self.question_button.text
         answer = self.answer_input.children[0]
 
         has_error = False
 
-        if not username.text.strip():
-            username.hint_text = "Error! Please fill in the box"
-            username.hint_text_color = (1, 0, 0, 1)  # Red color
-            has_error = True
-        if not question.text.strip():
-            question.hint_text = "Error! Please fill in the box"
-            question.hint_text_color = (1, 0, 0, 1)  # Red color
+        if selected_question == "Choose a security question":
+            self.question_button.text = "Please choose a security question"
+            self.question_button.color = (1, 0, 0, 1)  # Red color
             has_error = True
         if not answer.text.strip():
             answer.hint_text = "Error! Please fill in the box"

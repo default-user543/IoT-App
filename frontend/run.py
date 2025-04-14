@@ -14,6 +14,7 @@ from changepass import ChangepwImageScreen, ChangepwScreen
 from homescreen import HomeScreen
 from menuscreen import MenuScreen
 from places import PlacesScreen
+from confirm import ConfirmScreen 
 
 # Main application class
 class MyApp(App):
@@ -43,7 +44,8 @@ class MyApp(App):
 
         # Add places screen
         screen_manager.add_widget(PlacesScreen(name='places'))
-
+        
+        screen_manager.add_widget(ConfirmScreen(name='confirm'))
         return screen_manager
 
 if __name__ == "__main__":

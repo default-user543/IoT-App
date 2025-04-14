@@ -33,19 +33,19 @@ class LoginImageScreen(Screen):
         )
 
         # Tạo khung nhập liệu cho "User's name"
-        username_input = self.create_rounded_input("User's name")
+        self.username_input = self.create_rounded_input("User's name")
         # Tạo khung nhập liệu cho "Password"
-        password_input = self.create_rounded_input("Password", password=True)
+        self.password_input = self.create_rounded_input("Password", password=True)
 
         # Thêm các khung nhập liệu vào BoxLayout
-        input_layout.add_widget(username_input)
-        input_layout.add_widget(password_input)
+        input_layout.add_widget(self.username_input)
+        input_layout.add_widget(self.password_input)
 
         # Thêm nút "Forget password?"
         forget_password_label = Button(
             text="Forget password?",
             size_hint=(None, None),
-            size=(150, 50),
+            size=(200, 50),
             pos_hint={'center_x': 0.5, 'center_y': 0.28},
             font_size='20sp',
             background_color=(0, 0, 0, 0),
@@ -55,11 +55,11 @@ class LoginImageScreen(Screen):
         )
         forget_password_label.bind(on_press=self.go_to_forgetpassword_image)
 
-        # Thêm nút "Create account"
+        # Thêm nút "Log in"
         create_account_label = Button(
-            text="Create account",
+            text="Log in",
             size_hint=(None, None),
-            size=(150, 50),
+            size=(200, 50),
             pos_hint={'center_x': 0.5, 'center_y': 0.2},
             font_size='20sp',
             background_color=(0, 0, 0, 0),
@@ -67,7 +67,7 @@ class LoginImageScreen(Screen):
             background_normal='',
             background_down=''
         )
-        create_account_label.bind(on_press=self.go_to_signin_image)
+        create_account_label.bind(on_press=self.go_to_home_screen)
 
         # Thêm nút "Back" để quay lại màn hình chính
         back_button = Button(
@@ -130,6 +130,20 @@ class LoginImageScreen(Screen):
         # Điều hướng đến màn hình Forget Password Image
         self.manager.current = 'forget_password_image'
 
-    def go_to_signin_image(self, instance):
-        # Điều hướng đến màn hình Sign In Image
-        self.manager.current = 'signin_image'
+    def go_to_home_screen(self, instance):
+        """Kiểm tra đầu vào và chuyển đến trang Home nếu hợp lệ."""
+        username = self.username_input.children[0].text.strip()
+        password = self.password_input.children[0].text.strip()
+
+        # Kiểm tra nếu các trường bị bỏ trống
+        if not username:
+            self.username_input.children[0].hint_text = "Please fill in this box"
+            self.username_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+        if not password:
+            self.password_input.children[0].hint_text = "Please fill in this box"
+            self.password_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+
+        # Nếu hợp lệ, chuyển đến trang Home
+        self.manager.current = 'home'

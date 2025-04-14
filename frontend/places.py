@@ -4,6 +4,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.core.window import Window
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
 
 class PlacesScreen(Screen):
     def __init__(self, **kwargs):
