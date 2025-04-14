@@ -11,6 +11,9 @@ from login import LoginImageScreen  # Chỉ import LoginImageScreen
 from signin import SignInImageScreen
 from forgetpass import ForgetpwImageScreen  # Chỉ import ForgetpwImageScreen
 from changepass import ChangepwImageScreen, ChangepwScreen
+from homescreen import HomeScreen
+from menuscreen import MenuScreen
+from places import PlacesScreen
 
 # Main application class
 class MyApp(App):
@@ -19,27 +22,27 @@ class MyApp(App):
         screen_manager = ScreenManager()
 
         # Add main screen
-        main_screen = MainScreen(name='main')
-        screen_manager.add_widget(main_screen)
+        screen_manager.add_widget(MainScreen(name='main'))
 
         # Add login screens
-        login_image_screen = LoginImageScreen(name='login_image')
-        screen_manager.add_widget(login_image_screen)
+        screen_manager.add_widget(LoginImageScreen(name='login_image'))
 
         # Add sign-in screens
-        signin_image_screen = SignInImageScreen(name='signin_image')
-        screen_manager.add_widget(signin_image_screen)
+        screen_manager.add_widget(SignInImageScreen(name='signin_image'))
 
         # Add forget password screen
-        forgetpw_image_screen = ForgetpwImageScreen(name='forget_password_image')
-        screen_manager.add_widget(forgetpw_image_screen)
+        screen_manager.add_widget(ForgetpwImageScreen(name='forget_password_image'))
 
         # Add change password screens
-        changepw_screen = ChangepwScreen(name='change_password')
-        screen_manager.add_widget(changepw_screen)
+        screen_manager.add_widget(ChangepwScreen(name='change_password'))
+        screen_manager.add_widget(ChangepwImageScreen(name='change_password_image'))
 
-        changepw_image_screen = ChangepwImageScreen(name='change_password_image')
-        screen_manager.add_widget(changepw_image_screen)
+        # Add home and menu screens
+        screen_manager.add_widget(HomeScreen(name='home'))
+        screen_manager.add_widget(MenuScreen(name='menu'))
+
+        # Add places screen
+        screen_manager.add_widget(PlacesScreen(name='places'))
 
         return screen_manager
 
