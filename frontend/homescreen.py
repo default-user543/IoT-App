@@ -41,7 +41,7 @@ class HomeScreen(Screen):
             background_normal='',
             background_color=(0.2, 0.6, 1, 1)
         )
-        self.backbutton.bind(on_press=self.go_back_to_main)
+        self.backbutton.bind(on_press=self.go_back_to_login)
         
         #điều chỉnh kích thước dựa trên nền tảng:
         if platform != ['android', 'ios']:
@@ -57,8 +57,8 @@ class HomeScreen(Screen):
     def go_to_menu_screen(self, instance):
         self.manager.current = 'menu' #đi đến menuscreen.py
     
-    def go_back_to_main(self, instance):
-        self.manager.current = 'main' #đi đến main.py
+    def go_back_to_login(self, instance):
+        self.manager.current = 'login_image' #đi đến login.py
     
     # Thay đổi kích thước cửa sổ ứng dụng trên máy tính
     def set_window_size(self):

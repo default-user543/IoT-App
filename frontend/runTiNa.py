@@ -2,7 +2,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from homescreen import HomeScreen
 from menuscreen import MenuScreen
-
+from login import LoginImageScreen
 class TiNaApp(App):
     def build(self):
         # Tạo ScreenManager để quản lý các màn hình
@@ -14,6 +14,7 @@ class TiNaApp(App):
         # Thêm màn hình MenuScreen
         screen_manager.add_widget(MenuScreen(name='menu'))
 
+        screen_manager.add_widget(LoginImageScreen(name='login_image'))
         # Đặt màn hình ban đầu là HomeScreen
         screen_manager.current = 'home'
 
