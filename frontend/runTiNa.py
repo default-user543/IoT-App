@@ -15,8 +15,6 @@ class TiNaApp(App):
         screen_manager.add_widget(MenuScreen(name='menu'))
 
         screen_manager.add_widget(LoginImageScreen(name='login_image'))
-        # Đặt màn hình ban đầu là HomeScreen
-        screen_manager.current = 'home'
 
         return screen_manager
 
