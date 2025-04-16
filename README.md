@@ -1,5 +1,5 @@
 ### Các tính năng chính của dự án:
-+ Chia sẻ thông tin vị trí các địa danh nổi tiếng (For example: Hồ con rùa có gì, địa đạo củ chi có gì).
++ Chia sẻ thông tin vị trí của VGU.
 + Chia sẻ lộ trình đã đi.
 + Chia sẻ cảm nhận về địa danh này.
 
