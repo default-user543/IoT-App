@@ -58,7 +58,9 @@ def signup():
     password = user.get('password')
     confirm_password = user.get('confirm_password')
     ref=db.reference('users')
-
+    session['username']=username 
+    session.permanent = True
+    
     if not username or not password or not confirm_password:
         return jsonify({'message': 'Please provide all the information!', 'a': 6}), 400
 
@@ -88,8 +90,7 @@ def signup():
             'language': '',
         }
     }
-    session['username']=username 
-    session.permanent = True
+    
     ref.update(user_data)
     return jsonify({'message': 'Successfully!', 'a': 0}), 200
 
@@ -143,6 +144,8 @@ def login():
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
+    session['username'] = username
+    session.permanent = True
 
     if not username or not password:
         return jsonify({"message": "Please provide all required fields!", "a": 6}), 400
@@ -155,8 +158,7 @@ def login():
     if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
         return jsonify({"message": "Incorrect password!", "a": 8}), 401
 
-    session['username'] = username
-    session.permanent = True
+    
     return jsonify({"message": "Login successful!", "a": 0}), 200
 
 @app.route('/user-information', methods=['POST'])
