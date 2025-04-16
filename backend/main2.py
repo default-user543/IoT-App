@@ -8,6 +8,7 @@ from flask_session import Session
 from datetime import timedelta
 from flask_session import Session 
 from flask_cors import CORS
+import urllib.parse
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -102,10 +103,10 @@ def check_location():
     timestamp = data.get('timestamp')
 
     if "username" not in session:
-        return jsonify({'message': 'Please login or sign up first!'}), 400
+        return jsonify({'message': 'Please login or sign up first!', "a": 9}), 400
     username = session['username']
     if not latitude or not longitude:
-        return jsonify({"message": "Cannot get the GPS of the user!", "a": 6}), 400
+        return jsonify({"message": "Cannot get the GPS of the user!", "a": 10}), 400
 
     ref = db.reference('zones')
     zones = ref.get()
@@ -165,7 +166,7 @@ def login():
 def user_information():
     data = request.get_json()
     if 'username' not in session:
-        return jsonify({"message": "Please login or sign up!"})
+        return jsonify({"message": "Please login or sign up!", "a": 9})
     username=session['username']
     required_fields = ["city", "fav_colour", "fav_pet", "country", "language"]
 
@@ -199,7 +200,7 @@ def forgot_password():
     data = request.get_json()
     required_fields = ["city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
     if "username" not in session:
-        return jsonify({"message": "Please login or sign up!"})
+        return jsonify({"message": "Please login or sign up!", "a": 9})
     username = session['username']
 
     if not all(field in data and data[field] for field in required_fields):
@@ -239,6 +240,28 @@ def share():
     ref = db.reference(f"users/{username}/History_GPS")
     areas = {'areas': []}
     database = ref.get()
+    start = {"lat": None, "lng": None}
+    end = {"lat": None, "lng": None}
+    keys = list(database.keys())
+
+    first_key = keys[0]
+    first_item = database[first_key]
+    start = {
+        "lat": first_item.get('lat'),
+        "lng": first_item.get("lng")
+    }
+
+    last_key = keys[-1]
+    last_item = database[last_key]
+    end = {
+        "lat": last_item.get('lat'),
+        "lng": last_item.get("lng")
+    }
+    
+    start = f"{start['lat']},{start['lng']}"
+    end = f"{end['lat']},{end['lng']}"
+    maps = f"https://www.google.com/maps/dir/{urllib.parse.quote(start)}/{urllib.parse.quote(end)}"
+
     for key, data in database.items():
         if not areas['areas'] or areas['areas'][-1] != data['zone']:
             areas['areas'].append(data['zone'])
@@ -248,7 +271,14 @@ def share():
         result += data[i]
         if i != len(data) - 1:
             result += ' -> '
-    return jsonify({'areas': result})
+    return jsonify({'areas': result, "link": maps})
+
+@app.route("/test", methods = ["POST"])
+def test():
+    username = session['username']
+    if not username:
+        return jsonify({"message": "Please login or sign up"})
+    return jsonify({"username": username})
 
 if __name__ == "__main__":
     app.run(debug=True)
