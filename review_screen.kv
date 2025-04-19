@@ -1,0 +1,24 @@
+<ReviewScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Spinner:
+            id: zone_spinner
+            text: "Chọn khu vực"
+            on_text: root.on_zone_select(self.text)
+
+        Label:
+            id: review_list
+            text: ""
+            markup: True
+            size_hint_y: 0.6
+
+        TextInput:
+            id: review_input
+            hint_text: "Viết đánh giá mới"
+
+        Button:
+            text: "Gửi đánh giá"
+            on_press: root.add_review()

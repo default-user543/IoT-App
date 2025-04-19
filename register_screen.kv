@@ -1,0 +1,21 @@
+<RegisterScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "Đăng ký người dùng mới"
+            font_size: 24
+
+        TextInput:
+            id: name
+            hint_text: "Tên"
+
+        TextInput:
+            id: email
+            hint_text: "Email"
+
+        Button:
+            text: "Đăng ký"
+            on_press: root.register()
