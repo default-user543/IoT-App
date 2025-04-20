@@ -2,11 +2,16 @@
 import threading
 import os 
 
+# Đường dẫn tuyệt đối tới thư mục chứa app.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def backend():
-    os.system('python backend/main2.py')
+    path = os.path.join(BASE_DIR, "backend", "main2.py")
+    os.system(f'python "{path}"')
 
 def frontend():
-    os.system('python frontend/main.py')
+    path = os.path.join(BASE_DIR, "frontend", "run.py")
+    os.system(f'python "{path}"')
 
 if __name__ == '__main__':
     backend_t=threading.Thread(target=backend)
