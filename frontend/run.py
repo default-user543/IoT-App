@@ -15,7 +15,7 @@ from homescreen import HomeScreen
 from menuscreen import MenuScreen
 from places import PlacesScreen
 from confirm import ConfirmScreen 
-from hallscreen import HallsScreen
+from hallscreen import HallScreen
 
 # Main application class
 class MyApp(App):
@@ -47,7 +47,7 @@ class MyApp(App):
         screen_manager.add_widget(PlacesScreen(name='places'))
 
         # Add hall screen
-        screen_manager.add_widget(HallsScreen(name='lecturehallscreen'))
+        screen_manager.add_widget(HallScreen(name='lecturehallscreen'))
 
         screen_manager.add_widget(ConfirmScreen(name='confirm'))
         return screen_manager

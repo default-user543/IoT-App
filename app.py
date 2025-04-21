@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 def backend():
     path = os.path.join(BASE_DIR, "backend", "main2.py")
     os.system(f'python "{path}"')
+    print("Backend started")
 
 def frontend():
     path = os.path.join(BASE_DIR, "frontend", "run.py")

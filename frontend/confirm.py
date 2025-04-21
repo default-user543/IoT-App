@@ -7,6 +7,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.dropdown import DropDown
 from kivy.core.window import Window
 from kivy.uix.image import Image
+from kivy.graphics import Color, RoundedRectangle
 
 # Thiết lập màu nền cho ứng dụng
 Window.clearcolor = (1, 1, 1, 1)  # Màu trắng
@@ -76,8 +77,27 @@ class ConfirmScreen(Screen):
         )
         layout.add_widget(self.error_label)
 
+        #Xì tai cho mấy em nút
+        class RoundedButton(Button):
+            def __init__(self, **kwargs):
+                super(RoundedButton, self).__init__(**kwargs)
+                self.background_normal = ''
+                self.background_down = ''
+                self.background_color = (0, 0, 0, 0)  # Làm trong suốt để dùng canvas vẽ
+                self.color = (1, 1, 1, 1)  # Màu chữ
+
+                with self.canvas.before:
+                    Color(0.6, 0.8, 1.0, 1.0)  # Màu nền #99CCFF
+                    self.rect = RoundedRectangle(radius=[20])
+
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
         # Nút Submit
-        submit_button = Button(
+        submit_button = RoundedButton(
             text="Submit",
             size_hint=(None, None),
             size=(120, 50),
@@ -90,7 +110,7 @@ class ConfirmScreen(Screen):
         layout.add_widget(submit_button)
 
         # Nút Back để quay về SignIn
-        back_button = Button(
+        back_button = RoundedButton(
             text="Back",
             size_hint=(None, None),
             size=(120, 50),
