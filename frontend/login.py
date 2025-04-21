@@ -27,7 +27,7 @@ class LoginImageScreen(Screen):
         input_layout = BoxLayout(
             orientation='vertical',
             size_hint=(0.8, 0.4),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            pos_hint={'center_x': 0.5, 'center_y': 0.6},
             spacing=20,
             padding=[20, 20, 20, 20]
         )
@@ -45,22 +45,41 @@ class LoginImageScreen(Screen):
         forget_password_label = Button(
             text="Forget password?",
             size_hint=(None, None),
-            size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.28},
-            font_size='20sp',
+            size=(100, 30),
+            pos_hint={'center_x': 0.5, 'center_y': 0.4},
+            font_size='18sp',
             background_color=(0, 0, 0, 0),
-            color=(0.5, 0.5, 0.5, 1),
+            color=(1, 1, 1, 1),
             background_normal='',
             background_down=''
         )
         forget_password_label.bind(on_press=self.go_to_forgetpassword_image)
 
+        #Xì tai cho mấy em nút
+        class RoundedButton(Button):
+            def __init__(self, **kwargs):
+                super(RoundedButton, self).__init__(**kwargs)
+                self.background_normal = ''
+                self.background_down = ''
+                self.background_color = (0, 0, 0, 0)  # Làm trong suốt để dùng canvas vẽ
+                self.color = (1, 1, 1, 1)  # Màu chữ
+
+                with self.canvas.before:
+                    Color(0.6, 0.8, 1.0, 1.0)  # Màu nền #99CCFF
+                    self.rect = RoundedRectangle(radius=[20])
+
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
         # Thêm nút "Log in"
-        create_account_label = Button(
+        create_account_label = RoundedButton(
             text="Log in",
             size_hint=(None, None),
             size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
             font_size='20sp',
             background_color=(0, 0, 0, 0),
             color=(0.5, 0.5, 0.5, 1),
@@ -69,14 +88,15 @@ class LoginImageScreen(Screen):
         )
         create_account_label.bind(on_press=self.go_to_home_screen)
 
+
         # Thêm nút "Back" để quay lại màn hình chính
-        back_button = Button(
+        back_button = RoundedButton(
             text="Back",
             size_hint=(None, None),
-            size=(100, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.1},
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.22},
             font_size='20sp',
-            background_color=(0.8, 0.8, 0.8, 1.0),
+            background_color=(0.8, 0.8, 0.8, 0),
             background_normal='',
             background_down=''
         )
