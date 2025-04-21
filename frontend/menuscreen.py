@@ -2,11 +2,16 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.core.window import Window
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.graphics import Color, RoundedRectangle, Rectangle
 from kivy.core.image import Image as CoreImage
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.behaviors import ButtonBehavior
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
@@ -21,51 +26,150 @@ class MenuScreen(Screen):
         layout = FloatLayout()
         self.bg = Image(source='menu.png', keep_ratio=False, allow_stretch=True)
         layout.add_widget(self.bg)
+
+        # Header
+        header = BoxLayout(
+            size_hint=(1, None),
+            height='40dp',
+            padding=(10, 0, 10, 0),
+            spacing=20,
+            pos_hint={'top': 1}
+            )
+        with header.canvas.before:
+            Color(0.694, 0.875, 0.980, 1)  # background màu xám đậm
+            rect = Rectangle(pos=header.pos, size=header.size)
+
+        header.bind(pos=lambda *args: setattr(rect, 'pos', header.pos))
+        header.bind(size=lambda *args: setattr(rect, 'size', header.size))
+
+        # Username box
+        username_box = BoxLayout(
+            size_hint=(None, None),
+            size_hint_x=0.7,  
+            height='35dp',  # tùy chỉnh
+            padding=(20, 0),
+            pos_hint={'center_y': 0.5}
+        )
+
+        with username_box.canvas.before:
+            Color(0.204, 0.553, 0.761, 1)  # Màu nền xanh dương nhạt
+            rounded_rect = RoundedRectangle(
+                size=username_box.size,
+                pos=username_box.pos,
+                radius=[20]  # bo tròn 4 góc
+            )
+
+        # cập nhật lại khi size/pos thay đổi
+        def update_rect(*args):
+            rounded_rect.pos = username_box.pos
+            rounded_rect.size = username_box.size
+
+        username_box.bind(pos=update_rect, size=update_rect)
+        
+
+        # Username
+        name = Label(
+            text='Username',
+            color=(0.694, 0.875, 0.980, 1),
+            halign='left', 
+            valign='middle'
+        )
+        name.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+
+
+        username_box.add_widget(name)
+        header.add_widget(username_box)
+
+        # Share
+        share = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
+
+        share_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
+        
+        img = Image(
+            source = 'share_logo.png', 
+            allow_stretch=True, 
+            size_hint = (1, 1)
+            )
+        share.add_widget(img)
+        share.add_widget(share_button)
+        header.add_widget(share)
+
+
+        # Log out
+        logout = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
+
+        logout_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
+        logout_button.bind(on_press=self.go_back_to_home)
+
+
+        img = Image(
+            source = 'signout_logo.png', 
+            allow_stretch=True, 
+            size_hint = (1, 1)
+            )
+        logout.add_widget(img)
+        logout.add_widget(logout_button)
+        header.add_widget(logout)
+
+        layout.add_widget(header)
+
         
         # Tạo ScrollView
         scroll_view = ScrollView(
-            size_hint=(0.4, 0.5), pos_hint =({'center_x': 0.5, 'center_y': 0.5})
-            )
+            size_hint=(1, None),
+            size=(Window.width, Window.height - 80),  # trừ ra 80dp từ chiều cao cửa sổ
+            pos=(0, 0)
+        ) 
         
         # Tạo GridLayout bên trong ScrollView
         grid_layout = GridLayout(
             cols=1,
             size_hint_y=None,
-            row_default_height=100,
-            row_force_default=True,
             spacing=30,
-            size_hint_x=1,
-            width=300
+            padding=(10, 50, 10, 20),
         )
         grid_layout.bind(minimum_height=grid_layout.setter('height'))
+
+
+        # Các khối xanh biển
+        items = [
+            ("Lecture Hall", "1 m"),
+            ("Sport Hall", "5 m"),
+            ("Canteen", "30 m"),
+            ("Library", "35 m"),
+        ]
+
+        class StyledButton(ButtonBehavior, BoxLayout):
+            def __init__(self, text1, text2, **kwargs):
+                super().__init__(**kwargs)
+                self.padding = 10
+                self.size_hint_y = None
+                self.height = '80dp'
+                with self.canvas.before:
+                    Color(0.204, 0.553, 0.761, 0.7)
+                    self.rect = RoundedRectangle(radius=[15])
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+                self.label1 = Label(text= text1, color=(1, 1, 1, 1), font_size='16sp', bold=True, halign='left', valign='middle', padding=(15, 0))
+                self.label1.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+                self.label2 = Label(text= text2, color=(1, 1, 1, 1), font_size='16sp', bold=True, halign='right', valign='middle', padding=(15, 0))
+                self.label2.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+                self.add_widget(self.label1)
+                self.add_widget(self.label2)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
+        for item, distance in items:
+            btn = StyledButton(text1=item, text2=distance)
+            btn.place_name = item  # Gắn tên địa điểm vào button
+            btn.bind(on_press=self.go_to_relatedscreen)
+            grid_layout.add_widget(btn)
+
         scroll_view.add_widget(grid_layout)
 
-        # Thêm các nút vào GridLayout
-        buttons = '[b]Lecture Hall[/b]', '[b]Dormitory[/b]', '[b]Library[/b]', '[b]Stadium[/b]', '[b]Canteen[/b]'
-        for button_text in buttons:
-            menubutton = Button(
-                text = button_text,
-                size_hint=(None, None),
-                size=(200, 50),
-                pos_hint={'center_x': 0.5},
-                background_normal='',
-                background_color=(0.2, 0.6, 1, 1),
-                markup=True
-            )
-            menubutton.bind(on_press=self.go_to_relatedscreen)
-            grid_layout.add_widget(menubutton)
-
-        # Back button
-        self.backbutton = Button(
-            text='Back',
-            size_hint=(None, None),
-            size=(100, 50), 
-            pos_hint={'left': 1, 'top': 1},
-            background_normal='',
-            background_color=(0.2, 0.6, 1, 1)
-        )
-        self.backbutton.bind(on_press=self.go_back_to_home)
-        layout.add_widget(self.backbutton)
+        
 
         self.add_widget(layout)
 
@@ -76,8 +180,7 @@ class MenuScreen(Screen):
 
     def go_to_relatedscreen(self, instance):
         # Lấy tên nút được nhấn
-        button_text = instance.text
-        # Chuyển đổi tên nút thành tên screen tương ứng vd: 'Lecture Hall' -> 'hallscreen'
-        screen_name = button_text.split(' ')[-1].lower() + 'screen'
+        place_name = instance.place_name
+        screen_name = place_name.replace(' ', '').lower() + 'screen'
         self.manager.current = screen_name
 
