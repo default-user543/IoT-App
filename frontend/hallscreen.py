@@ -8,7 +8,11 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.image import Image as CoreImage
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, RoundedRectangle
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.stencilview import StencilView
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.relativelayout import RelativeLayout
 
 class HallScreen (Screen):
     def __init__(self, **kwargs):
@@ -20,53 +24,178 @@ class HallScreen (Screen):
         self.bg = Image(source='hallscreen.png', keep_ratio=False, allow_stretch=True)
         layout.add_widget(self.bg)
 
-        #Tạo ScrollView cho văn bản
-        scroll_view = ScrollView(
-            size_hint=(1, 0.6),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            height = 500,
-            do_scroll_x = False,
-            do_scroll_y = True
-        )
-        with scroll_view.canvas.before:
-            Color(1, 1, 1, 1)
-            self.rect = Rectangle(size=scroll_view.size, pos=scroll_view.pos)
+        class RoundedScrollView(StencilView):
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                with self.canvas.before:
+                    Color(1, 1, 1, 1)  # White background
+                    self.bg = RoundedRectangle(radius=[20], pos=self.pos, size=self.size)
+
+                self.bind(pos=self.update_bg, size=self.update_bg)
+
+            def update_bg(self, *args):
+                self.bg.pos = self.pos
+                self.bg.size = self.size
+
+        # Tao header
+        self.header = BoxLayout(
+            size_hint_y=None, 
+            height='40dp', 
+            padding=(10, 0, 10, 0), 
+            spacing = 20,
+            pos_hint={'top': 1}
+            )
+        with self.header.canvas.before:
+            Color(0.694, 0.875, 0.980, 1)  # background màu xám đậm
+            rect = Rectangle(pos=self.header.pos, size=self.header.size)
+
+        self.header.bind(pos=lambda *args: setattr(rect, 'pos', self.header.pos))
+        self.header.bind(size=lambda *args: setattr(rect, 'size', self.header.size))
+
+        # Back
+        back = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
+
+        back_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
+        back_button.bind(on_press=self.back_to_menu)
         
-        scroll_view.bind(size=self._update_rect, pos=self._update_rect)
+        img = Image(
+            source = 'back_icon.png', 
+            allow_stretch=True, 
+            size_hint = (1, 1)
+            )
+        back.add_widget(img)
+        back.add_widget(back_button)
+        self.header.add_widget(back)
 
-        text = "Text is here"*10
-        text_label = Label(
-            text = text,
-            size_hint_y=None,
-            height = scroll_view.height,
-            padding = [20, 20, 20, 20],
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            font_size = 20,
-            color = (0, 0, 0, 1),
-            markup=True,
-            halign = 'justify'
-        )
-        text_label.bind(size=text_label.setter('text_size'))
-        text_label.height = text_label.texture_size[1]
-
-        scroll_view.add_widget(text_label)
-        layout.add_widget(scroll_view)
-
-        self.backbutton = Button(
-            text='Back',
+        # Username box
+        username_box = BoxLayout(
             size_hint=(None, None),
-            size=(100, 50),
-            pos_hint={'left': 1, 'top': 1},
-            background_normal='',
-            background_color=(0.2, 0.6, 1, 1),
-            font_size = 22
+            size_hint_x=0.7,  
+            height='35dp',  # tùy chỉnh
+            padding=(20, 0),
+            pos_hint={'center_y': 0.5}
         )
-        self.backbutton.bind(on_release=self.back_to_menu)
-        layout.add_widget(self.backbutton)
+
+        with username_box.canvas.before:
+            Color(0.204, 0.553, 0.761, 1)  # Màu nền xanh dương nhạt
+            rounded_rect = RoundedRectangle(
+                size=username_box.size,
+                pos=username_box.pos,
+                radius=[20]  # bo tròn 4 góc
+            )
+
+        # cập nhật lại khi size/pos thay đổi
+        def update_rect(*args):
+            rounded_rect.pos = username_box.pos
+            rounded_rect.size = username_box.size
+
+        username_box.bind(pos=update_rect, size=update_rect)
+        
+
+        # Username
+        name = Label(
+            text='Username',
+            color=(0.694, 0.875, 0.980, 1),
+            halign='left', 
+            valign='middle'
+        )
+        name.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+
+
+        username_box.add_widget(name)
+        self.header.add_widget(username_box)
+
+        # Share
+        share = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
+
+        share_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
+        share_button.bind(on_press=self.share_button_pressed)
+        
+        img = Image(
+            source = 'share_logo.png', 
+            allow_stretch=True, 
+            size_hint = (1, 1)
+            )
+        share.add_widget(img)
+        share.add_widget(share_button)
+        self.header.add_widget(share)
+
+
+        # Log out
+        logout = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
+
+        logout_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
+        logout_button.bind(on_press=self.go_back_to_home)
+
+
+        img = Image(
+            source = 'signout_logo.png', 
+            allow_stretch=True, 
+            size_hint = (1, 1)
+            )
+        logout.add_widget(img)
+        logout.add_widget(logout_button)
+        self.header.add_widget(logout)
+
+
+        # Hien thi header
+        layout.add_widget(self.header)
+
+        # Scrollable area
+        self.scroll_view = ScrollView(
+            size_hint=(1, None),
+            size=(Window.width, Window.height - 35), 
+            pos=(0, 0)
+        )
+        self.grid_layout = GridLayout(
+            cols=1, 
+            size_hint_y=None, 
+            spacing=25, 
+            padding=(10, 35, 10, 20)
+            )
+        self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
+
+        texts = "Text is here"*10
+
+        scroll_box_height = 0.8 * Window.size[1]  
+
+        class StyledButton(ButtonBehavior, BoxLayout):
+            def __init__(self, text, **kwargs):
+                super().__init__(**kwargs)
+                self.padding = 0
+                self.size_hint_y = None
+                self.height = scroll_box_height
+                with self.canvas.before:
+                    Color(0.694, 0.875, 0.980, 0.5)
+                    self.rect = RoundedRectangle(radius=[15])
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+                self.label = Label(text= texts, color=(1, 1, 1, 1), font_size='16sp', bold=True, halign='left', valign='middle', padding=(15, 0))
+                self.label.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+                self.add_widget(self.label)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
+        btn = StyledButton(text = texts)
+        self.grid_layout.add_widget(btn)
+
+
+        self.scroll_view.add_widget(self.grid_layout)
+        layout.add_widget(self.scroll_view)
+
+
 
     def _update_rect(self, instance, value):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
+
+    def go_back_to_home(self, instance):
+        self.manager.current = 'home'
+
+    def share_button_pressed(self, instance):        
+        pass  # Add functionality here if needed
 
     def set_window_size(self):
             img = CoreImage('hallscreen.png')
@@ -77,11 +206,3 @@ class HallScreen (Screen):
         self.manager.current = 'menu'
         self.manager.transition.direction = 'right'
 
-if __name__ == '__main__':
-    Window.size = (800, 600)
-    class MyApp(App):
-        def build(self):
-            sm = ScreenManager()
-            sm.add_widget(HallScreen(name='hallscreen'))
-            return sm
-    MyApp().run()
