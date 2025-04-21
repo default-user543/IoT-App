@@ -32,7 +32,7 @@ class ForgetpwImageScreen(Screen):
         self.input_layout = BoxLayout(
             orientation='vertical',
             size_hint=(0.8, 0.4),
-            pos_hint={'center_x': 0.5, 'center_y': 0.4},
+            pos_hint={'center_x': 0.5, 'center_y': 0.6},
             spacing=10,
             padding=[20, 20, 20, 20]
         )
@@ -68,13 +68,32 @@ class ForgetpwImageScreen(Screen):
         self.answer_input = self.create_rounded_input("Answer")
         self.input_layout.add_widget(self.answer_input)
 
+        #Xì tai cho mấy em nút
+        class RoundedButton(Button):
+            def __init__(self, **kwargs):
+                super(RoundedButton, self).__init__(**kwargs)
+                self.background_normal = ''
+                self.background_down = ''
+                self.background_color = (0, 0, 0, 0)  # Làm trong suốt để dùng canvas vẽ
+                self.color = (1, 1, 1, 1)  # Màu chữ
+
+                with self.canvas.before:
+                    Color(0.6, 0.8, 1.0, 1.0)  # Màu nền #99CCFF
+                    self.rect = RoundedRectangle(radius=[20])
+
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
         # Add "Submit" button
-        submit_button = Button(
+        submit_button = RoundedButton(
             text="Submit",
             size_hint=(None, None),
-            size=(100, 40),
-            pos_hint={'center_x': 0.5, 'center_y': 0.13},
-            font_size='15sp',
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.32},
+            font_size='20sp',
             background_color=(0.8, 0.8, 0.8, 1.0),
             background_normal='',
             background_down=''
@@ -82,12 +101,12 @@ class ForgetpwImageScreen(Screen):
         submit_button.bind(on_press=self.validate_inputs)
 
         # Add "Back" button
-        back_button = Button(
+        back_button = RoundedButton(
             text="Back",
             size_hint=(None, None),
-            size=(100, 40),
-            pos_hint={'center_x': 0.5, 'center_y': 0.04},
-            font_size='15sp',
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.25},
+            font_size='20sp',
             background_color=(0.8, 0.8, 0.8, 1.0),
             background_normal='',
             background_down=''
