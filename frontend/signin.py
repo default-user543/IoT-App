@@ -5,6 +5,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
+import requests
+import json
 
 class SignInImageScreen(Screen):
     def __init__(self, **kwargs):
@@ -148,15 +150,34 @@ class SignInImageScreen(Screen):
             self.confirm_password_input.children[0].hint_text = "Please fill in this box"
             self.confirm_password_input.children[0].hint_text_color = (1, 0, 0, 1)
             return
+    
 
         # Kiểm tra nếu mật khẩu không khớp
         if password != confirm_password:
             self.confirm_password_input.children[0].hint_text = "Confirm wrong"
             self.confirm_password_input.children[0].hint_text_color = (1, 0, 0, 1)
             return
+        
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/sign-up"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "username": username,
+            "password": password,
+            "confirm_password": confirm_password
+        }
 
-        # Nếu hợp lệ, chuyển sang màn hình confirm
-        self.manager.current = 'confirm'
+        try:
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Sign-up successful!")
+                self.manager.current = 'confirm' # Nếu hợp lệ, chuyển sang màn hình confirm
+            else:
+                data = response.json()
+                print("Error:", data.get("message"))
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
+
 
     def go_to_login(self, instance):
         """Chuyển sang màn hình login."""
