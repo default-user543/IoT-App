@@ -23,28 +23,42 @@ class MainScreen(Screen):
         # Tạo widget Image để hiển thị ảnh nền
         background = Image(source='background.png', allow_stretch=True, keep_ratio=False, size_hint=(1, 1), pos_hint={'x': 0, 'y': 0})
 
+        #Xì tai cho mấy em nút
+        class RoundedButton(Button):
+            def __init__(self, **kwargs):
+                super(RoundedButton, self).__init__(**kwargs)
+                self.background_normal = ''
+                self.background_down = ''
+                self.background_color = (0, 0, 0, 0)  # Làm trong suốt để dùng canvas vẽ
+                self.color = (1, 1, 1, 1)  # Màu chữ
+
+                with self.canvas.before:
+                    Color(0.6, 0.8, 1.0, 1.0)  # Màu nền #99CCFF
+                    self.rect = RoundedRectangle(radius=[20])
+
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
+
         # Tạo nút "Log in" với màu nút #99CCFF
-        login_button = Button(
+        login_button = RoundedButton(
             text="Log in",
             size_hint=(None, None),
             size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.6},
+            pos_hint={'center_x': 0.5, 'center_y': 0.55},
             font_size='20sp',  # Phóng to chữ
-            background_color=(0.6, 0.8, 1.0, 1.0),  # Màu #99CCFF
-            background_normal='',  # Loại bỏ hình nền mặc định
-            background_down=''  # Loại bỏ hình nền khi nhấn
         )
 
         # Tạo nút "Sign in" với màu nút #99CCFF
-        signin_button = Button(
+        signin_button = RoundedButton(
             text="Sign in",
             size_hint=(None, None),
             size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.4},
+            pos_hint={'center_x': 0.5, 'center_y': 0.45},
             font_size='20sp',  # Phóng to chữ
-            background_color=(0.6, 0.8, 1.0, 1.0),  # Màu #99CCFF
-            background_normal='',  # Loại bỏ hình nền mặc định
-            background_down=''  # Loại bỏ hình nền khi nhấn
         )
 
         # Thêm sự kiện khi nhấp vào nút "Log in"
