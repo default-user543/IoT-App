@@ -29,29 +29,48 @@ class ChangepwImageScreen(Screen):
         )
 
         # Tạo BoxLayout để chứa các khung nhập liệu
-        input_layout = BoxLayout(
+        self.input_layout = BoxLayout(
             orientation='vertical',
             size_hint=(0.8, 0.4),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            pos_hint={'center_x': 0.5, 'center_y': 0.6},
             spacing=20,
             padding=[20, 20, 20, 20]
         )
 
         # Tạo khung nhập liệu cho "User's name"
-        password_input = self.create_rounded_input("New Password")
+        self.password_input = self.create_rounded_input("New Password")
         # Tạo khung nhập liệu cho "Keyword"
-        confirm_password_input = self.create_rounded_input("Confirm Password")
+        self.confirm_password_input = self.create_rounded_input("Confirm Password")
 
         # Thêm các khung nhập liệu vào BoxLayout
-        input_layout.add_widget(password_input)
-        input_layout.add_widget(confirm_password_input)
+        self.input_layout.add_widget(self.password_input)
+        self.input_layout.add_widget(self.confirm_password_input)
+
+        #Xì tai cho mấy em nút
+        class RoundedButton(Button):
+            def __init__(self, **kwargs):
+                super(RoundedButton, self).__init__(**kwargs)
+                self.background_normal = ''
+                self.background_down = ''
+                self.background_color = (0, 0, 0, 0)  # Làm trong suốt để dùng canvas vẽ
+                self.color = (1, 1, 1, 1)  # Màu chữ
+
+                with self.canvas.before:
+                    Color(0.6, 0.8, 1.0, 1.0)  # Màu nền #99CCFF
+                    self.rect = RoundedRectangle(radius=[20])
+
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
 
         # Thêm nút "Back" để quay lại trang login
-        submit_button = Button(
+        submit_button = RoundedButton(
             text="Submit",
             size_hint=(None, None),
-            size=(100, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.1},
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
             font_size='20sp',
             background_color=(0.8, 0.8, 0.8, 1.0),  # Màu xám
             background_normal='',
@@ -63,7 +82,7 @@ class ChangepwImageScreen(Screen):
 
         # Thêm các widget vào layout
         layout.add_widget(login_image)
-        layout.add_widget(input_layout)
+        layout.add_widget(self.input_layout)
         layout.add_widget(submit_button)
 
         # Thêm layout vào màn hình

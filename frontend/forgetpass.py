@@ -193,4 +193,4 @@ class ForgetpwImageScreen(Screen):
 
     def go_to_changepassword(self, instance):
         # Navigate to the change password screen
-        self.manager.current = 'change_password'
+        self.manager.current = 'change_password_image'
