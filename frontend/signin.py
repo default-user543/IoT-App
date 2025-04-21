@@ -26,7 +26,7 @@ class SignInImageScreen(Screen):
         input_layout = BoxLayout(
             orientation='vertical',
             size_hint=(0.8, 0.5),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            pos_hint={'center_x': 0.5, 'center_y': 0.6},
             spacing=20,
             padding=[20, 20, 20, 20]
         )
@@ -43,12 +43,31 @@ class SignInImageScreen(Screen):
         input_layout.add_widget(self.password_input)
         input_layout.add_widget(self.confirm_password_input)
 
+        #Xì tai cho mấy em nút
+        class RoundedButton(Button):
+            def __init__(self, **kwargs):
+                super(RoundedButton, self).__init__(**kwargs)
+                self.background_normal = ''
+                self.background_down = ''
+                self.background_color = (0, 0, 0, 0)  # Làm trong suốt để dùng canvas vẽ
+                self.color = (1, 1, 1, 1)  # Màu chữ
+
+                with self.canvas.before:
+                    Color(0.6, 0.8, 1.0, 1.0)  # Màu nền #99CCFF
+                    self.rect = RoundedRectangle(radius=[20])
+
+                self.bind(pos=self.update_rect, size=self.update_rect)
+
+            def update_rect(self, *args):
+                self.rect.pos = self.pos
+                self.rect.size = self.size
+
         # Thêm nút "Next"
-        next_button = Button(
+        next_button = RoundedButton(
             text="Next",
             size_hint=(None, None),
-            size=(100, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.1},
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.25},
             font_size='20sp',
             background_color=(0.8, 0.8, 0.8, 1.0),
             background_normal='',
@@ -60,11 +79,11 @@ class SignInImageScreen(Screen):
         login_button = Button(
             text="Already have an account?",
             size_hint=(None, None),
-            size=(200, 50),
-            pos_hint={'center_x': 0.5, 'center_y': 0.2},
-            font_size='20sp',
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.35},
+            font_size='18sp',
             background_color=(0, 0, 0, 0),
-            color=(0.5, 0.5, 0.5, 1),
+            color=(1, 1, 1, 1),
             background_normal='',
             background_down=''
         )
