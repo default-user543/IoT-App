@@ -151,7 +151,7 @@ class LibraryScreen(Screen):
         )
         self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
 
-        texts = " The VGU Library is the core hub of the University in providing users with seamless access to innovative services, rich information resources and advanced facilities to enhance the University's learning, teaching and research capacity. The library will be the most modern model in Vietnam with many modern facilities and learning spaces, designed to suit multi-purpose requirements and learning styles. The library with airy and lively space serves different types of learning and research of students and researchers. The library will be equipped with resources in print, digital and other formats to serve the diverse needs of target groups to ensure the quality of technical research."
+        texts = "The VGU Library is the core hub of the University in providing users with seamless access to innovative services, rich information resources and advanced facilities to enhance the University's learning, teaching and research capacity. The library will be the most modern model in Vietnam with many modern facilities and learning spaces, designed to suit multi-purpose requirements and learning styles. The library with airy and lively space serves different types of learning and research of students and researchers. The library will be equipped with resources in print, digital and other formats to serve the diverse needs of target groups to ensure the quality of technical research."
 
         scroll_box_height = 0.8 * Window.size[1]
 
@@ -174,9 +174,6 @@ class LibraryScreen(Screen):
                 self.rect.pos = self.pos
                 self.rect.size = self.size
 
-        btn = StyledButton(text=texts)
-        self.grid_layout.add_widget(btn)
-
         # Thanh cuộn ngang chứa hình ảnh
         image_scroll_view = ScrollView(
             size_hint=(1, None),
@@ -195,7 +192,7 @@ class LibraryScreen(Screen):
         image_container.bind(minimum_width=image_container.setter('width'))  # Đảm bảo kích thước thay đổi theo số lượng ảnh
 
         # Thêm các hình ảnh vào container
-        image_sources = ['library1.png', 'library2.png', 'library3.png', 'library4.png', 'library5.png', 'library6.png', 'library7.png', 'library8.png', 'library9.png', 'library10.png', 'library11.png', 'library12.png', 'library13.png', 'library14.png']  # Thay bằng đường dẫn ảnh của bạn
+        image_sources = ['library1.png', 'library2.png', 'library3.png', 'library4.png', 'library5.png', 'library6.png']  # Thay bằng đường dẫn ảnh của bạn
         for source in image_sources:
             img = Image(
                 source=source,
@@ -209,8 +206,12 @@ class LibraryScreen(Screen):
         # Thêm container vào ScrollView
         image_scroll_view.add_widget(image_container)
 
-        # Thêm thanh cuộn ngang vào layout chính
+        # Thêm thanh cuộn ngang vào layout chính trước phần text
         self.grid_layout.add_widget(image_scroll_view)
+
+        # Thêm nút chứa text
+        btn = StyledButton(text=texts)
+        self.grid_layout.add_widget(btn)
 
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)

@@ -152,7 +152,7 @@ class AdministrationBuildingScreen(Screen):
         self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
 
         texts = "The administration building features a square block structure with four striking colors on four sides. The six-story design includes office space, airy meeting rooms, and a skylight area. The administration building is the most striking architectural structure on the new VGU campus and the workplace of all VGU employees."
-        
+
         scroll_box_height = 0.8 * Window.size[1]
 
         class StyledButton(ButtonBehavior, BoxLayout):
@@ -173,9 +173,6 @@ class AdministrationBuildingScreen(Screen):
             def update_rect(self, *args):
                 self.rect.pos = self.pos
                 self.rect.size = self.size
-
-        btn = StyledButton(text=texts)
-        self.grid_layout.add_widget(btn)
 
         # Thanh cuộn ngang chứa hình ảnh
         image_scroll_view = ScrollView(
@@ -209,8 +206,12 @@ class AdministrationBuildingScreen(Screen):
         # Thêm container vào ScrollView
         image_scroll_view.add_widget(image_container)
 
-        # Thêm thanh cuộn ngang vào layout chính
+        # Thêm thanh cuộn ngang vào layout chính trước phần text
         self.grid_layout.add_widget(image_scroll_view)
+
+        # Thêm nút chứa text
+        btn = StyledButton(text=texts)
+        self.grid_layout.add_widget(btn)
 
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)

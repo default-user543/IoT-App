@@ -174,9 +174,6 @@ class AcademicVillageScreen(Screen):
                 self.rect.pos = self.pos
                 self.rect.size = self.size
 
-        btn = StyledButton(text=texts)
-        self.grid_layout.add_widget(btn)
-
         # Thanh cuộn ngang chứa hình ảnh
         image_scroll_view = ScrollView(
             size_hint=(1, None),
@@ -195,7 +192,7 @@ class AcademicVillageScreen(Screen):
         image_container.bind(minimum_width=image_container.setter('width'))  # Đảm bảo kích thước thay đổi theo số lượng ảnh
 
         # Thêm các hình ảnh vào container
-        image_sources = ['academicvillage1.png', 'academicvillage2.png', 'academicvillage3.png', 'academicvillage4.png', 'academicvillage5.png', 'academicvillage6.png', 'academicvillage7.png', 'academicvillage8.png', 'academicvillage9.png', 'academicvillage10.png', 'academicvillage11.png']  # Thay bằng đường dẫn ảnh của bạn
+        image_sources = ['academicvillage1.png', 'academicvillage2.png', 'academicvillage3.png', 'academicvillage4.png', 'academicvillage5.png']  # Thay bằng đường dẫn ảnh của bạn
         for source in image_sources:
             img = Image(
                 source=source,
@@ -209,8 +206,12 @@ class AcademicVillageScreen(Screen):
         # Thêm container vào ScrollView
         image_scroll_view.add_widget(image_container)
 
-        # Thêm thanh cuộn ngang vào layout chính
+        # Thêm thanh cuộn ngang vào layout chính trước phần text
         self.grid_layout.add_widget(image_scroll_view)
+
+        # Thêm nút chứa text
+        btn = StyledButton(text=texts)
+        self.grid_layout.add_widget(btn)
 
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)

@@ -174,9 +174,6 @@ class DormitoryScreen(Screen):
                 self.rect.pos = self.pos
                 self.rect.size = self.size
 
-        btn = StyledButton(text=texts)
-        self.grid_layout.add_widget(btn)
-
         # Thanh cuộn ngang chứa hình ảnh
         image_scroll_view = ScrollView(
             size_hint=(1, None),
@@ -209,8 +206,12 @@ class DormitoryScreen(Screen):
         # Thêm container vào ScrollView
         image_scroll_view.add_widget(image_container)
 
-        # Thêm thanh cuộn ngang vào layout chính
+        # Thêm thanh cuộn ngang vào layout chính trước phần text
         self.grid_layout.add_widget(image_scroll_view)
+
+        # Thêm nút chứa text
+        btn = StyledButton(text=texts)
+        self.grid_layout.add_widget(btn)
 
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
