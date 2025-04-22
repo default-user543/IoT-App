@@ -12,31 +12,20 @@ from kivy.graphics import Color, RoundedRectangle, Rectangle
 from kivy.core.image import Image as CoreImage
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
+from kivy_garden.mapview import MapView, MapMarkerPopup
+
+Window.clearcolor = (1, 1, 1, 1) 
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super(MenuScreen, self).__init__(**kwargs)
         
-        def set_window_size(self):
-            img = CoreImage('menu.png')
-            width, height = img.size
-            Window.size = (width*0.35, height*0.35)  
-        set_window_size(self)
-
-        layout = FloatLayout()
-        self.bg = Image(source='menu.png', keep_ratio=False, allow_stretch=True)
-        layout.add_widget(self.bg)
+        main_layout = BoxLayout(orientation='vertical', spacing=10)
 
         # Header
-        header = BoxLayout(
-            size_hint=(1, None),
-            height='40dp',
-            padding=(10, 0, 10, 0),
-            spacing=20,
-            pos_hint={'top': 1}
-            )
+        header = BoxLayout(size_hint_y=None, height='50dp', padding=(10, 0, 10, 10), spacing = 20)
         with header.canvas.before:
-            Color(0.694, 0.875, 0.980, 1)  # background màu xám đậm
+            Color(0.694, 0.878, 0.980, 1)  # background màu xám đậm
             rect = Rectangle(pos=header.pos, size=header.size)
 
         header.bind(pos=lambda *args: setattr(rect, 'pos', header.pos))
@@ -44,8 +33,7 @@ class MenuScreen(Screen):
 
         # Username box
         username_box = BoxLayout(
-            size_hint=(None, None),
-            size_hint_x=0.7,  
+            size_hint=(0.7, None),
             height='35dp',  # tùy chỉnh
             padding=(20, 0),
             pos_hint={'center_y': 0.5}
@@ -95,12 +83,12 @@ class MenuScreen(Screen):
         header.add_widget(share)
 
 
+
         # Log out
         logout = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
 
         logout_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
         logout_button.bind(on_press=self.go_back_to_home)
-
 
         img = Image(
             source = 'signout_logo.png', 
@@ -111,25 +99,25 @@ class MenuScreen(Screen):
         logout.add_widget(logout_button)
         header.add_widget(logout)
 
-        layout.add_widget(header)
+        main_layout.add_widget(header)
+
+        # Thêm widget bản đồ ở đây
+        map_container = BoxLayout(padding=(10, 10), size_hint_y=None, height='410dp')  # có padding
+        main_layout.add_widget(map_container)
 
         
-        # Tạo ScrollView
-        scroll_view = ScrollView(
-            size_hint=(1, None),
-            size=(Window.width, Window.height - 80),  # trừ ra 80dp từ chiều cao cửa sổ
-            pos=(0, 0)
-        ) 
+
+        mapview = MapView(zoom=17, lat=10.762622, lon=106.660172)  # Ví dụ: Tọa độ HCM
+        marker = MapMarkerPopup(lat=10.762622, lon=106.660172)
+        mapview.add_widget(marker)
+
+        map_container.add_widget(mapview)
+
         
-        # Tạo GridLayout bên trong ScrollView
-        grid_layout = GridLayout(
-            cols=1,
-            size_hint_y=None,
-            spacing=30,
-            padding=(10, 50, 10, 20),
-        )
+        # Scrollable area
+        scroll_view = ScrollView(size_hint_y = 1)
+        grid_layout = GridLayout(cols=1, size_hint_y=None, spacing=25, padding=(10, 20))
         grid_layout.bind(minimum_height=grid_layout.setter('height'))
-
 
         # Các khối xanh biển
         items = [
@@ -142,16 +130,19 @@ class MenuScreen(Screen):
             ("Ceremony Hall", "70 m"),
             ("Administration Building", "80 m"),
             ("Academic Village", "90 m")
+            
         ]
+
+        items.sort(key=lambda x: int(x[1].split()[0]))
 
         class StyledButton(ButtonBehavior, BoxLayout):
             def __init__(self, text1, text2, **kwargs):
                 super().__init__(**kwargs)
                 self.padding = 10
                 self.size_hint_y = None
-                self.height = '80dp'
+                self.height = '100dp'
                 with self.canvas.before:
-                    Color(0.204, 0.553, 0.761, 0.7)
+                    Color(0.204, 0.553, 0.761, 1)
                     self.rect = RoundedRectangle(radius=[15])
                 self.bind(pos=self.update_rect, size=self.update_rect)
 
@@ -173,12 +164,12 @@ class MenuScreen(Screen):
             grid_layout.add_widget(btn)
 
         scroll_view.add_widget(grid_layout)
+        main_layout.add_widget(scroll_view)
 
         
 
-        self.add_widget(layout)
+        self.add_widget(main_layout)
 
-        self.add_widget(scroll_view)
     
     def go_back_to_home(self, instance):
         self.manager.current = 'home'
