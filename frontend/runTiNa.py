@@ -3,6 +3,7 @@ from kivy.uix.screenmanager import ScreenManager
 from homescreen import HomeScreen
 from menuscreen import MenuScreen
 from login import LoginImageScreen
+from hallscreen import HallScreen
 class TiNaApp(App):
     def build(self):
         # Tạo ScreenManager để quản lý các màn hình
@@ -15,7 +16,7 @@ class TiNaApp(App):
         screen_manager.add_widget(MenuScreen(name='menu'))
 
         screen_manager.add_widget(LoginImageScreen(name='login_image'))
-
+        screen_manager.add_widget(HallScreen(name='lecturehallscreen'))
         return screen_manager
 
 if __name__ == "__main__":
