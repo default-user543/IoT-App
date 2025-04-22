@@ -4,15 +4,15 @@
 - Share the route of user.
 - Show the current position of user.
 
-### Công nghệ:
+### Technologies and related-libraries:
 
 - Frontend: Kivy
 - Backend: Flask, Flask-Session, Flask-CORS
 - Database: Firebase Admin SDK (Firebase Real-time Database)
-- Mã hoá password: Bcrypt
-- Xử lý hình học: Shapely (Polygon-Approach)
-- Thời gian: Datetime
-- Xử lý link giao tiếp với Google Maps API: urllib.parse
+- Ecryption: Bcrypt
+- Geometric and coordinate processing: Shapely (Polygon-Approach)
+- Real-time: Datetime
+- API's communication and feature Google Maps API: urllib.parse
 
 ---
 
