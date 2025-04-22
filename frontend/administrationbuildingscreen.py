@@ -13,7 +13,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.textinput import TextInput
+
 
 class AdministrationBuildingScreen(Screen):
     def __init__(self, **kwargs):
@@ -212,39 +212,8 @@ class AdministrationBuildingScreen(Screen):
         # Thêm thanh cuộn ngang vào layout chính
         self.grid_layout.add_widget(image_scroll_view)
 
-        # Mục bình luận
-        comment_section = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=(10, 10))
-        comment_section.bind(minimum_height=comment_section.setter('height'))
-
-        # Danh sách bình luận
-        self.comment_list = BoxLayout(orientation='vertical', size_hint_y=None, spacing=5)
-        self.comment_list.bind(minimum_height=self.comment_list.setter('height'))
-        comment_section.add_widget(self.comment_list)
-
-        # Ô nhập bình luận
-        comment_input_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=5)
-        self.comment_input = TextInput(hint_text="Write a comment...", size_hint=(0.8, 1), multiline=False)
-        submit_button = Button(text="Submit", size_hint=(0.2, 1))
-        submit_button.bind(on_press=self.submit_comment)
-        comment_input_box.add_widget(self.comment_input)
-        comment_input_box.add_widget(submit_button)
-
-        # Thêm ô nhập bình luận vào mục bình luận
-        comment_section.add_widget(comment_input_box)
-
-        # Thêm mục bình luận vào layout chính
-        self.grid_layout.add_widget(comment_section)
-
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
-
-    def submit_comment(self, instance):
-        comment = self.comment_input.text.strip()
-        if comment:
-            # Thêm bình luận vào danh sách
-            self.comment_list.add_widget(Label(text=comment, size_hint_y=None, height=30, color=(0, 0, 0, 1)))
-            # Xóa nội dung trong ô nhập
-            self.comment_input.text = ""
 
     def _update_rect(self, instance, value):
         self.rect.pos = instance.pos

@@ -13,7 +13,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.textinput import TextInput
+
 
 class LibraryScreen(Screen):
     def __init__(self, **kwargs):
@@ -151,9 +151,7 @@ class LibraryScreen(Screen):
         )
         self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
 
-        texts = "VGU Library is the core hub of the University in providing users seamless access to innovative services, rich information resources and cutting-edge facilities to advance learning, teaching and research capacities of the University. The library will be a state-of-the-art model in Vietnam with a wide range of modern equipment and study areas, designed to suit the multi-purpose requirements and learning styles. The VGU Library is the core hub of the University in providing users with seamless access to innovative services, rich information resources and advanced facilities to enhance the University's learning, teaching and research capacity. The library will be the most modern model in Vietnam with many modern facilities and learning spaces, designed to suit multi-purpose requirements and learning styles. The library with airy and lively space serves different types of learning and research of students and researchers. The library will be equipped with resources in print, digital and other formats to serve the diverse needs of target groups to ensure the quality of technical research."\
-
-        "The library building has four main floors with a total area of ​​over 4,000 m2, each serving a variety of purposes. The first floor is an easily accessible common area with exhibition spaces, event spaces, book return rooms, and delivery services. On the first floor, you can visit the University Shop and purchase souvenirs and stationery. A nurse is always on duty at the Health Department, according to the school's work schedule: from 9:00 a.m. to 4:00 p.m. There is a dedicated area for returning books: the VGU Library's automatic book return machine, which operates 24/7. For students who do not live in the dormitory and need to bring food and heat it up, there is a Student Lounge on the first floor of the library. The room is equipped with a refrigerator and a microwave. The second floor houses a computer system with waiting areas and lockers for personal belongings, an area for presentations, readings, and other activities. The fourth floor also features individual and group study areas, multimedia classrooms, and more."
+        texts = " The VGU Library is the core hub of the University in providing users with seamless access to innovative services, rich information resources and advanced facilities to enhance the University's learning, teaching and research capacity. The library will be the most modern model in Vietnam with many modern facilities and learning spaces, designed to suit multi-purpose requirements and learning styles. The library with airy and lively space serves different types of learning and research of students and researchers. The library will be equipped with resources in print, digital and other formats to serve the diverse needs of target groups to ensure the quality of technical research."
 
         scroll_box_height = 0.8 * Window.size[1]
 
@@ -214,39 +212,8 @@ class LibraryScreen(Screen):
         # Thêm thanh cuộn ngang vào layout chính
         self.grid_layout.add_widget(image_scroll_view)
 
-        # Mục bình luận
-        comment_section = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=(10, 10))
-        comment_section.bind(minimum_height=comment_section.setter('height'))
-
-        # Danh sách bình luận
-        self.comment_list = BoxLayout(orientation='vertical', size_hint_y=None, spacing=5)
-        self.comment_list.bind(minimum_height=self.comment_list.setter('height'))
-        comment_section.add_widget(self.comment_list)
-
-        # Ô nhập bình luận
-        comment_input_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=5)
-        self.comment_input = TextInput(hint_text="Write a comment...", size_hint=(0.8, 1), multiline=False)
-        submit_button = Button(text="Submit", size_hint=(0.2, 1))
-        submit_button.bind(on_press=self.submit_comment)
-        comment_input_box.add_widget(self.comment_input)
-        comment_input_box.add_widget(submit_button)
-
-        # Thêm ô nhập bình luận vào mục bình luận
-        comment_section.add_widget(comment_input_box)
-
-        # Thêm mục bình luận vào layout chính
-        self.grid_layout.add_widget(comment_section)
-
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
-
-    def submit_comment(self, instance):
-        comment = self.comment_input.text.strip()
-        if comment:
-            # Thêm bình luận vào danh sách
-            self.comment_list.add_widget(Label(text=comment, size_hint_y=None, height=30, color=(0, 0, 0, 1)))
-            # Xóa nội dung trong ô nhập
-            self.comment_input.text = ""
 
     def _update_rect(self, instance, value):
         self.rect.pos = instance.pos

@@ -13,7 +13,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.textinput import TextInput
+
 
 class DormitoryScreen(Screen):
     def __init__(self, **kwargs):
@@ -152,7 +152,7 @@ class DormitoryScreen(Screen):
         self.grid_layout.bind(minimum_height=self.grid_layout.setter('height'))
 
         texts = "There are two dormitory buildings. The one that is all orange is the dormitory one and the one that is all blue is dormitory two. Under each dormitory, there is a vending machine and a common study room equipped with air conditioning and full tables and chairs. Under the orange dormitory building is the Uni convenience store, the dormitory management office and the medical room are under the blue dormitory building. Many trees are in the middle of each building, and the two buildings are separated by a yard with many shade trees and stone benches. From the second to the fifth floor, each building has a common kitchen for students to cook and a laundry room."
-       
+
         scroll_box_height = 0.8 * Window.size[1]
 
         class StyledButton(ButtonBehavior, BoxLayout):
@@ -195,7 +195,7 @@ class DormitoryScreen(Screen):
         image_container.bind(minimum_width=image_container.setter('width'))  # Đảm bảo kích thước thay đổi theo số lượng ảnh
 
         # Thêm các hình ảnh vào container
-        image_sources = ['dormitory1.png', 'dormitory2.png', 'dormitory3.png', 'dormitory4.png', 'dormitory5.png', 'dormitory6.png','dormitory7.png']  # Thay bằng đường dẫn ảnh của bạn
+        image_sources = ['dormitory1.png', 'dormitory2.png', 'dormitory3.png', 'dormitory4.png', 'dormitory5.png', 'dormitory6.png', 'dormitory7.png']  # Thay bằng đường dẫn ảnh của bạn
         for source in image_sources:
             img = Image(
                 source=source,
@@ -212,39 +212,8 @@ class DormitoryScreen(Screen):
         # Thêm thanh cuộn ngang vào layout chính
         self.grid_layout.add_widget(image_scroll_view)
 
-        # Mục bình luận
-        comment_section = BoxLayout(orientation='vertical', size_hint_y=None, spacing=10, padding=(10, 10))
-        comment_section.bind(minimum_height=comment_section.setter('height'))
-
-        # Danh sách bình luận
-        self.comment_list = BoxLayout(orientation='vertical', size_hint_y=None, spacing=5)
-        self.comment_list.bind(minimum_height=self.comment_list.setter('height'))
-        comment_section.add_widget(self.comment_list)
-
-        # Ô nhập bình luận
-        comment_input_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=5)
-        self.comment_input = TextInput(hint_text="Write a comment...", size_hint=(0.8, 1), multiline=False)
-        submit_button = Button(text="Submit", size_hint=(0.2, 1))
-        submit_button.bind(on_press=self.submit_comment)
-        comment_input_box.add_widget(self.comment_input)
-        comment_input_box.add_widget(submit_button)
-
-        # Thêm ô nhập bình luận vào mục bình luận
-        comment_section.add_widget(comment_input_box)
-
-        # Thêm mục bình luận vào layout chính
-        self.grid_layout.add_widget(comment_section)
-
         self.scroll_view.add_widget(self.grid_layout)
         layout.add_widget(self.scroll_view)
-
-    def submit_comment(self, instance):
-        comment = self.comment_input.text.strip()
-        if comment:
-            # Thêm bình luận vào danh sách
-            self.comment_list.add_widget(Label(text=comment, size_hint_y=None, height=30, color=(0, 0, 0, 1)))
-            # Xóa nội dung trong ô nhập
-            self.comment_input.text = ""
 
     def _update_rect(self, instance, value):
         self.rect.pos = instance.pos
