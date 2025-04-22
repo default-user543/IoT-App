@@ -137,6 +137,11 @@ class MenuScreen(Screen):
             ("Sport Hall", "5 m"),
             ("Canteen", "30 m"),
             ("Library", "35 m"),
+            ("Dormitory", "50 m"),
+            ("Cluster Hall", "60 m"),
+            ("Ceremony Hall", "70 m"),
+            ("Administration Building", "80 m"),
+            ("Academic Village", "90 m")
         ]
 
         class StyledButton(ButtonBehavior, BoxLayout):
