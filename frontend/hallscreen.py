@@ -13,6 +13,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.stencilview import StencilView
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.relativelayout import RelativeLayout
+import requests
+import json
 
 
 class HallScreen(Screen):
@@ -92,9 +94,10 @@ class HallScreen(Screen):
 
         username_box.bind(pos=update_rect, size=update_rect)
 
+
         # Username
         name = Label(
-            text='Username',
+            text="Welcome to the lecture hall!",
             color=(0.694, 0.875, 0.980, 1),
             halign='left',
             valign='middle'
@@ -104,20 +107,7 @@ class HallScreen(Screen):
         username_box.add_widget(name)
         self.header.add_widget(username_box)
 
-        # Share
-        share = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
-
-        share_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
-        share_button.bind(on_press=self.share_button_pressed)
-
-        img = Image(
-            source='share_logo.png',
-            allow_stretch=True,
-            size_hint=(1, 1)
-        )
-        share.add_widget(img)
-        share.add_widget(share_button)
-        self.header.add_widget(share)
+        
 
         # Log out
         logout = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
@@ -220,9 +210,6 @@ class HallScreen(Screen):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
-    def go_back_to_home(self, instance):
-        self.manager.current = 'home'
-
     def share_button_pressed(self, instance):
         pass  # Add functionality here if needed
 
@@ -234,3 +221,20 @@ class HallScreen(Screen):
     def back_to_menu(self, instance):
         self.manager.current = 'menu'
         self.manager.transition.direction = 'right'
+
+    
+    def go_back_to_home(self, instance):
+
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/logout"
+        headers = {'Content-Type': 'application/json'}
+        
+
+        try:
+            payload = {}  # Define payload as an empty dictionary or add necessary data
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Log out successful!")
+                self.manager.current = 'login_image' 
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
