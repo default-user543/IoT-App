@@ -14,7 +14,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy_garden.mapview import MapView, MapMarkerPopup
 
-Window.clearcolor = (1, 1, 1, 1) 
+Window.clearcolor = (1, 1, 1, 1)
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
@@ -152,6 +152,19 @@ class MenuScreen(Screen):
                 self.label2.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
                 self.add_widget(self.label1)
                 self.add_widget(self.label2)
+            
+                if text2.strip() == '1 m':
+                    self.status_label = Label(
+                        text = "You are here",
+                        color = (1, 1, 1, 1),
+                        font_size = '14sp',
+                        italic = True,
+                        halign = 'left',
+                        valign = 'middle',
+                        padding = (15,0)
+                    )
+                    self.status_label.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+                    self.add_widget(self.status_label)
 
             def update_rect(self, *args):
                 self.rect.pos = self.pos
@@ -165,8 +178,6 @@ class MenuScreen(Screen):
 
         scroll_view.add_widget(grid_layout)
         main_layout.add_widget(scroll_view)
-
-        
 
         self.add_widget(main_layout)
 
