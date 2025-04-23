@@ -269,7 +269,9 @@ def share():
 
 @app.route("/test", methods = ["POST"])
 def test():
-    username = session['username']
+    username = session.get('username')
+    print("Session username:", session.get("username"))
+    print("Request cookies:", request.cookies)
     if not username:
         return jsonify({"message": "Please login or sign up"})
     return jsonify({"username": username})

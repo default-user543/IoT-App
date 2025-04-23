@@ -7,6 +7,8 @@ from kivy.core.window import Window
 from kivy.utils import platform
 from kivy.uix.label import Label
 from kivy.uix.button import Button, ButtonBehavior
+import requests
+import json
 
 class TouchableImage(ButtonBehavior, Image):
     pass
@@ -55,7 +57,14 @@ class HomeScreen(Screen):
     
     # định nghĩa thao tác:
     def go_to_menu_screen(self, instance):
-        self.manager.current = 'menu' #đi đến menuscreen.py
+        app = App.get_running_app()
+        session = app.session  
+        try:                
+            res = session.post("http://127.0.0.1:5000/test")
+            print("Test response:", res.json())
+            self.manager.current = 'menu'
+        except Exception as e:
+            print("No username found!")
     
     def go_back_to_login(self, instance):
         self.manager.current = 'login_image' #đi đến login.py

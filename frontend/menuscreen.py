@@ -13,15 +13,19 @@ from kivy.core.image import Image as CoreImage
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy_garden.mapview import MapView, MapMarkerPopup
+from kivy.utils import platform
+from plyer import gps
+import requests
 import requests
 import json
-from plyer import gps
+
 
 Window.clearcolor = (1, 1, 1, 1)
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super(MenuScreen, self).__init__(**kwargs)
+
 
         
         main_layout = BoxLayout(orientation='vertical', spacing=10)
@@ -58,19 +62,19 @@ class MenuScreen(Screen):
 
         username_box.bind(pos=update_rect, size=update_rect)
 
-         
+        On_text = self.get_username_from_backend()
 
         # Username
-        name = Label(
-            text="",
+        self.name_label = Label(
+            text=f'Hello, {On_text}',
             color=(0.694, 0.875, 0.980, 1),
             halign='left', 
             valign='middle'
         )
-        name.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+        self.name_label.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
 
 
-        username_box.add_widget(name)
+        username_box.add_widget(self.name_label)
         header.add_widget(username_box)
 
         # Share
@@ -113,11 +117,14 @@ class MenuScreen(Screen):
 
         
 
-        mapview = MapView(zoom=17, lat=11.108766932780382, lon=106.61475735229159)  
+        self.mapview = MapView(zoom=17, lat=11.108766932780382, lon=106.61475735229159)  
         marker = MapMarkerPopup(lat=11.108766932780382, lon=106.61475735229159)
-        mapview.add_widget(marker)
+        self.mapview.add_widget(marker)
 
-        map_container.add_widget(mapview)
+        map_container.add_widget(self.mapview)
+
+        self.loc_getter = LocationGetter(self.mapview)
+        self.loc_getter.get_location()
 
         
         # Scrollable area
@@ -183,6 +190,12 @@ class MenuScreen(Screen):
 
         self.add_widget(main_layout)
 
+        try:
+            gps.configure(on_location=self.on_location, on_status=self.on_status)
+            gps.start(minTime=1000, minDistance=1)  # Cập nhật mỗi 1 giây hoặc khi đi được 1m
+        except NotImplementedError:
+            print("GPS không được hỗ trợ trên thiết bị này")
+
     
     def go_back_to_home(self, instance):
 
@@ -244,11 +257,7 @@ class MenuScreen(Screen):
         except Exception as e:
             print(f"Error sending location: {e}")
 
-        try:
-            gps.configure(on_location=self.on_location, on_status=self.on_status)
-            gps.start(minTime=1000, minDistance=1)  # Cập nhật mỗi 1 giây hoặc khi đi được 1m
-        except NotImplementedError:
-            print("GPS không được hỗ trợ trên thiết bị này")
+        
 
     def on_location(self, **kwargs):
         lat = kwargs.get('lat')
@@ -257,8 +266,154 @@ class MenuScreen(Screen):
 
         # Thêm marker vào bản đồ
         marker = MapMarkerPopup(lat=lat, lon=lon)
-        self.ids.mapview.add_widget(marker)
-        self.ids.mapview.center_on(lat, lon)
+        self.mapview.add_widget(marker)
+        self.mapview.center_on(lat, lon)
+
+        from time import time
+        self.send_location_to_backend(lat, lon, time())
+
+        # Sau khi gửi lên backend -> lấy kết quả khu vực hiện tại từ backend
+        url = "http://127.0.0.1:5000/check-location"
+        payload = {
+            "latitude": lat,
+            "longitude": lon,
+            "timestamp": time()
+        }
+        headers = {'Content-Type': 'application/json'}
+        try:
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            if response.status_code == 200:
+                result = response.json()
+                zone_name = result.get('name', 'Unknown')
+                print(f"📍 Đang ở: {zone_name}")
+
+                # Cập nhật giao diện scrollview
+                self.update_scrollview_for_location(zone_name)
+
+        except Exception as e:
+            print(f"Lỗi lấy zone từ backend: {e}")
 
     def on_status(self, stype, status):
         print(f"GPS status: {stype} - {status}")
+
+
+    def get_username_from_backend(self):
+        app = App.get_running_app()
+        session = app.session
+        try:
+            res = session.post(
+                "http://127.0.0.1:5000/test",  # thay bằng địa chỉ thật
+            )
+            if res.status_code == 200:    
+                data = res.json()
+                print(res.json())
+                return data.get("username")
+            else:
+                print("Không thê lấy username", res.status_code)
+                return None
+        except Exception as e:
+            print("Error getting username:", e)
+            return None
+        
+    def on_pre_enter(self):
+        username = self.get_username_from_backend()
+        if username:
+            self.name_label.text = f"Hello, {username}"
+
+
+    def update_scrollview_for_location(self, current_zone):
+        scroll_view = self.children[0].children[0]  # truy cập ScrollView
+        grid_layout = scroll_view.children[0]  # truy cập GridLayout
+
+        # Duyệt qua từng button để kiểm tra
+        for btn in grid_layout.children:
+            if hasattr(btn, 'place_name'):
+                if btn.place_name == current_zone:
+                    btn.label1.text = current_zone
+                    # Thêm label "You are here" nếu chưa có
+                    if not hasattr(btn, 'status_label'):
+                        status_label = Label(
+                            text="You are here",
+                            color=(1, 1, 1, 1),
+                            font_size='14sp',
+                            italic=True,
+                            halign='left',
+                            valign='middle',
+                            padding=(15, 0)
+                        )
+                        status_label.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
+                        btn.add_widget(status_label)
+                        btn.status_label = status_label
+                else:
+                    # Ẩn label nếu không phải vị trí hiện tại
+                    if hasattr(btn, 'status_label'):
+                        btn.remove_widget(btn.status_label)
+                        del btn.status_label
+
+        # Đưa nút đang đứng lên đầu danh sách
+        for btn in grid_layout.children[:]:
+            if hasattr(btn, 'place_name') and btn.place_name == current_zone:
+                grid_layout.remove_widget(btn)
+                grid_layout.add_widget(btn, index=len(grid_layout.children))  
+
+
+
+class LocationGetter:
+    def __init__(self, mapview):
+        self.mapview = mapview
+        self.location = None
+        self.current_marker = None  # Ban đầu chưa có marker
+
+    def get_location(self):
+        if platform == 'android':
+            self.get_android_location()
+        else:
+            self.get_ip_location()
+
+    def get_android_location(self):
+        try:
+            gps.configure(on_location=self.on_location, on_status=self.on_status)
+            gps.start(minTime=1000, minDistance=1)
+        except NotImplementedError:
+            print("GPS không khả dụng trên thiết bị này.")
+
+    def on_location(self, **kwargs):
+        lat = kwargs.get('lat')
+        lon = kwargs.get('lon')
+        print(f"📍 Vị trí hiện tại: {lat}, {lon}")
+
+        if self.current_marker:
+            self.mapview.remove_widget(self.current_marker)
+
+        self.current_marker = MapMarkerPopup(lat=lat, lon=lon)
+        self.mapview.add_widget(self.current_marker)
+        self.mapview.center_on(lat, lon)
+
+        from time import time
+        self.send_location_to_backend(lat, lon, time())
+
+    def on_status(self, stype, status):
+        print("📶 GPS Status:", stype, status)
+
+    def get_ip_location(self):
+        
+        try:
+            res = requests.get("https://ipinfo.io/json")
+            data = res.json()
+            lat, lon = map(float, data['loc'].split(','))
+            print("🌍 IP-based location:", lat, lon)
+
+            if self.current_marker:
+                self.mapview.remove_widget(self.current_marker)
+
+            self.current_marker = MapMarkerPopup(lat=lat, lon=lon)
+            self.mapview.add_widget(self.current_marker)
+            self.mapview.center_on(lat, lon)
+
+            from time import time
+            self.send_location_to_backend(lat, lon, time())
+
+        except Exception as e:
+            print("Lỗi IP định vị:", e)
+
+

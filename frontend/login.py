@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
+from kivy.app import App
 
 # frontend/api.py
 
@@ -19,6 +20,7 @@ BASE_URL = "http://127.0.0.1:5000"
 class LoginImageScreen(Screen):
     def __init__(self, **kwargs):
         super(LoginImageScreen, self).__init__(**kwargs)
+        self.session = requests.Session()
 
         # Tạo layout chính với FloatLayout
         layout = FloatLayout()
@@ -199,6 +201,8 @@ class LoginImageScreen(Screen):
             self.password_input.children[0].hint_text_color = (1, 0, 0, 1)
             return
         
+        app = App.get_running_app()
+        session = app.session
         # Gửi request tới backend
         url = "http://127.0.0.1:5000/login"
         headers = {'Content-Type': 'application/json'}
@@ -208,12 +212,22 @@ class LoginImageScreen(Screen):
         }
 
         try:
-            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            response = session.post(url, data=json.dumps(payload), headers=headers)
             if response.status_code == 200:
+                print("Login successful. Session cookie:", session.cookies.get_dict())
+
+                test_response = session.post("http://127.0.0.1:5000/test")
+                print("Test response:", test_response.json())
+
+                app = App.get_running_app()
+                app.session = session
+
                 print("Sign-up successful!")
                 self.manager.current = 'home' 
             else:
                 data = response.json()
                 print("Error:", data.get("message"))
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
         except requests.exceptions.RequestException as e:
             print("Failed to connect to backend:", e)

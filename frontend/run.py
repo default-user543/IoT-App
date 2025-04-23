@@ -24,10 +24,12 @@ from ceremonyhallscreen import CeremonyHallScreen
 from administrationbuildingscreen import AdministrationBuildingScreen
 from sporthallscreen import SportHallScreen
 from academicvillagescreen import AcademicVillageScreen
+import requests
 
 # Main application class
 class MyApp(App):
     def build(self):
+        self.session = requests.Session()    # Store session in the app instance
         # Create ScreenManager to manage screens
         screen_manager = ScreenManager()
 
