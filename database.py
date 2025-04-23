@@ -459,56 +459,7 @@ ZONE_DATA = {
   }
 }
 
-# ====== ROUTES DEFINITION START ======
 GOOGLE_MAPS_API_KEY = "AIzaSyA_AtjVapEMZKN4SUjmD5yD5z6sEsaLylA"
 
-ROUTES = [
-  {
-    "id": "route_01",
-    "route_name": "Dorm to Library",
-    "start_zone": "dorm_1",
-    "end_zone": "library",
-    "start_coords": {
-      "lat": 11.107611664805617,
-      "lng": 106.6125024639175
-    },
-    "end_coords": {
-      "lat": 11.10833663258289,
-      "lng": 106.61426596153228
-    },
-    "description": "Walk from Dorm 1 to Library across main road.",
-    "creator": "admin"
-  },
-  {
-    "id": "route_02",
-    "route_name": "Admin Tour",
-    "start_zone": "admin_building",
-    "end_zone": "ceremoney_hall",
-    "start_coords": {
-      "lat": 11.109820297162976,
-      "lng": 106.615062688108
-    },
-    "end_coords": {
-      "lat": 11.108045142267862,
-      "lng": 106.61342175024117
-    },
-    "description": "Quick walk from admin block to the ceremony hall.",
-    "creator": "admin"
-  },
-  {
-    "id": "route_03",
-    "route_name": "Lecture Dash",
-    "start_zone": "dorm_2",
-    "end_zone": "lecture_hall",
-    "start_coords": {
-      "lat": 11.106424839255137,
-      "lng": 106.61294053682967
-    },
-    "end_coords": {
-      "lat": 11.107023698788261,
-      "lng": 106.6148847151346
-    },
-    "description": "Recommended for students rushing from Dorm 2 to morning classes.",
-    "creator": "admin"
-  }
-]
+
+
