@@ -16,6 +16,14 @@ from menuscreen import MenuScreen
 from places import PlacesScreen
 from confirm import ConfirmScreen 
 from hallscreen import HallScreen
+from dormitoryscreen import DormitoryScreen
+from clusterhallscreen import ClusterHallScreen
+from canteenscreen import CanteenScreen
+from libraryscreen import LibraryScreen
+from ceremonyhallscreen import CeremonyHallScreen
+from administrationbuildingscreen import AdministrationBuildingScreen
+from sporthallscreen import SportHallScreen
+from academicvillagescreen import AcademicVillageScreen
 
 # Main application class
 class MyApp(App):
@@ -48,6 +56,14 @@ class MyApp(App):
 
         # Add hall screen
         screen_manager.add_widget(HallScreen(name='lecturehallscreen'))
+        screen_manager.add_widget(DormitoryScreen(name='dormitoryscreen'))
+        screen_manager.add_widget(ClusterHallScreen(name='clusterhallscreen'))
+        screen_manager.add_widget(CanteenScreen(name='canteenscreen'))
+        screen_manager.add_widget(LibraryScreen(name='libraryscreen'))
+        screen_manager.add_widget(CeremonyHallScreen(name='ceremonyhallscreen'))
+        screen_manager.add_widget(AdministrationBuildingScreen(name='administrationbuildingscreen'))
+        screen_manager.add_widget(SportHallScreen(name='sporthallscreen'))
+        screen_manager.add_widget(AcademicVillageScreen(name='academicvillagescreen'))
 
         screen_manager.add_widget(ConfirmScreen(name='confirm'))
         return screen_manager

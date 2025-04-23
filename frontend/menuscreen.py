@@ -185,7 +185,20 @@ class MenuScreen(Screen):
 
     
     def go_back_to_home(self, instance):
-        self.manager.current = 'home'
+
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/logout"
+        headers = {'Content-Type': 'application/json'}
+        
+
+        try:
+            payload = {}  # Define payload as an empty dictionary or add necessary data
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Log out successful!")
+                self.manager.current = 'login_image' 
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
 
     def go_to_relatedscreen(self, instance):
         # Lấy tên nút được nhấn
