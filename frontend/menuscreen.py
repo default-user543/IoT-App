@@ -15,12 +15,14 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy_garden.mapview import MapView, MapMarkerPopup
 import requests
 import json
+from plyer import gps
 
 Window.clearcolor = (1, 1, 1, 1)
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super(MenuScreen, self).__init__(**kwargs)
+
         
         main_layout = BoxLayout(orientation='vertical', spacing=10)
 
@@ -55,11 +57,12 @@ class MenuScreen(Screen):
             rounded_rect.size = username_box.size
 
         username_box.bind(pos=update_rect, size=update_rect)
-        
+
+         
 
         # Username
         name = Label(
-            text='Username',
+            text="",
             color=(0.694, 0.875, 0.980, 1),
             halign='left', 
             valign='middle'
@@ -110,8 +113,8 @@ class MenuScreen(Screen):
 
         
 
-        mapview = MapView(zoom=17, lat=10.762622, lon=106.660172)  # Ví dụ: Tọa độ HCM
-        marker = MapMarkerPopup(lat=10.762622, lon=106.660172)
+        mapview = MapView(zoom=17, lat=11.108766932780382, lon=106.61475735229159)  
+        marker = MapMarkerPopup(lat=11.108766932780382, lon=106.61475735229159)
         mapview.add_widget(marker)
 
         map_container.add_widget(mapview)
@@ -124,22 +127,21 @@ class MenuScreen(Screen):
 
         # Các khối xanh biển
         items = [
-            ("Lecture Hall", "1 m"),
-            ("Sport Hall", "5 m"),
-            ("Canteen", "30 m"),
-            ("Library", "35 m"),
-            ("Dormitory", "50 m"),
-            ("Cluster Hall", "60 m"),
-            ("Ceremony Hall", "70 m"),
-            ("Administration Building", "80 m"),
-            ("Academic Village", "90 m")
+            ("Lecture Hall"),
+            ("Sport Hall"),
+            ("Canteen"),
+            ("Library"),
+            ("Dormitory"),
+            ("Cluster Hall"),
+            ("Ceremony Hall"),
+            ("Administration Building"),
+            ("Academic Village")
             
         ]
 
-        items.sort(key=lambda x: int(x[1].split()[0]))
 
         class StyledButton(ButtonBehavior, BoxLayout):
-            def __init__(self, text1, text2, **kwargs):
+            def __init__(self, text1, **kwargs):
                 super().__init__(**kwargs)
                 self.padding = 10
                 self.size_hint_y = None
@@ -151,12 +153,9 @@ class MenuScreen(Screen):
 
                 self.label1 = Label(text= text1, color=(1, 1, 1, 1), font_size='16sp', bold=True, halign='left', valign='middle', padding=(15, 0))
                 self.label1.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
-                self.label2 = Label(text= text2, color=(1, 1, 1, 1), font_size='16sp', bold=True, halign='right', valign='middle', padding=(15, 0))
-                self.label2.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
                 self.add_widget(self.label1)
-                self.add_widget(self.label2)
             
-                if text2.strip() == '1 m':
+                if text1.strip() != "":
                     self.status_label = Label(
                         text = "You are here",
                         color = (1, 1, 1, 1),
@@ -173,8 +172,8 @@ class MenuScreen(Screen):
                 self.rect.pos = self.pos
                 self.rect.size = self.size
 
-        for item, distance in items:
-            btn = StyledButton(text1=item, text2=distance)
+        for item in items:
+            btn = StyledButton(text1=item)
             btn.place_name = item  # Gắn tên địa điểm vào button
             btn.bind(on_press=self.go_to_relatedscreen)
             grid_layout.add_widget(btn)
@@ -212,7 +211,7 @@ class MenuScreen(Screen):
             print("Lỗi kết nối backend:", e)
 
 
-    def get_location_to_backend(self, latitude, longitude, timestamp):
+    def send_location_to_backend(self, latitude, longitude, timestamp):
         url = "http://127.0.0.1:5000/check-location"  
         headers = {'Content-Type': 'application/json'}
         payload = {
@@ -232,4 +231,21 @@ class MenuScreen(Screen):
         except Exception as e:
             print(f"Error sending location: {e}")
 
+        try:
+            gps.configure(on_location=self.on_location, on_status=self.on_status)
+            gps.start(minTime=1000, minDistance=1)  # Cập nhật mỗi 1 giây hoặc khi đi được 1m
+        except NotImplementedError:
+            print("GPS không được hỗ trợ trên thiết bị này")
 
+    def on_location(self, **kwargs):
+        lat = kwargs.get('lat')
+        lon = kwargs.get('lon')
+        print(f"Vị trí hiện tại: {lat}, {lon}")
+
+        # Thêm marker vào bản đồ
+        marker = MapMarkerPopup(lat=lat, lon=lon)
+        self.ids.mapview.add_widget(marker)
+        self.ids.mapview.center_on(lat, lon)
+
+    def on_status(self, stype, status):
+        print(f"GPS status: {stype} - {status}")

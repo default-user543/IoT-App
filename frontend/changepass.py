@@ -177,7 +177,6 @@ class ChangepwScreen(Screen):
 
     def go_back_to_main(self, instance):
         """Kiểm tra đầu vào và hiển thị lỗi nếu cần."""
-        username = self.username_input.children[0].text.strip()
         password = self.password_input.children[0].text.strip()
         confirm_password = self.confirm_password_input.children[0].text.strip()
 
@@ -202,7 +201,7 @@ class ChangepwScreen(Screen):
         url = "http://127.0.0.1:5000/forgot-password"
         headers = {'Content-Type': 'application/json'}
         payload = {
-            "new_password": password
+            "reset_password": password
         }
 
         try:

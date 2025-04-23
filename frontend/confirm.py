@@ -8,6 +8,8 @@ from kivy.uix.dropdown import DropDown
 from kivy.core.window import Window
 from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
+import requests
+import json
 
 # Thiết lập màu nền cho ứng dụng
 Window.clearcolor = (1, 1, 1, 1)  # Màu trắng
@@ -143,9 +145,43 @@ class ConfirmScreen(Screen):
         if not answer:
             self.error_label.text = "Error! Please fill in this box"
             return
+        
+        if selected_question == "Your favourite pet":
+            fav_pet = answer
+            fav_colour = ""
+            city = ""
+        elif selected_question == "Your favourite colour":
+            fav_colour = answer
+            fav_pet = ""
+            city = ""
+        elif selected_question == "The city where you live":
+            city = answer
+            fav_colour = ""
+            fav_pet = ""
+        
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/user-information"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "city": city,
+            "fav_colour": fav_colour,
+            "fav_pet": fav_pet,
+            "country": "",
+            "language": ""
+        }
 
-        # Nếu hợp lệ, chuyển sang màn hình đăng nhập
-        self.manager.current = 'login_image'
+        try:
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Sign-up successful!")
+                self.manager.current = 'login_image'
+            else:
+                data = response.json()
+                print("Error:", data.get("message"))
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
+
+
 
     def go_back_to_signin(self, instance):
         self.manager.current = 'signin_image'

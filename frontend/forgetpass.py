@@ -7,6 +7,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.dropdown import DropDown
 from kivy.graphics import Color, RoundedRectangle
 from kivy.core.window import Window
+import requests
+import json
 
 # Set background color for the app
 Window.clearcolor = (1, 1, 1, 1)  # White background
@@ -192,5 +194,36 @@ class ForgetpwImageScreen(Screen):
         self.manager.current = 'login_image'
 
     def go_to_changepassword(self, instance):
-        # Navigate to the change password screen
-        self.manager.current = 'change_password_image'
+
+        if self.question_button.text == "Your favourite pet":
+            pet_answer = self.answer_input.children[0].text.strip()
+            colour_answer = ""
+            city_answer = ""
+        elif self.question_button.text == "Your favourite colour":
+            colour_answer = self.answer_input.children[0].text.strip()
+            pet_answer = ""
+            city_answer = ""
+        elif self.question_button.text == "The city where you live":
+            city_answer = self.answer_input.children[0].text.strip()
+            pet_answer = ""
+            colour_answer = ""
+
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/forgot-password"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "city": city_answer,
+            "fav_colour": colour_answer,
+            "fav_pet": pet_answer,
+        }
+
+        try:
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Successful!")
+                self.manager.current = 'change_password_image' # Nếu hợp lệ, chuyển sang màn hình confirm
+            else:
+                data = response.json()
+                print("Error:", data.get("message"))
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)

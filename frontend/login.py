@@ -156,8 +156,33 @@ class LoginImageScreen(Screen):
         self.manager.current = 'main'
 
     def go_to_forgetpassword_image(self, instance):
-        # Điều hướng đến màn hình Forget Password Image
-        self.manager.current = 'forget_password_image'
+
+        #"""Kiểm tra đầu vào và chuyển đến trang Home nếu hợp lệ."""
+        username = self.username_input.children[0].text.strip()
+
+        if not username:
+            self.username_input.children[0].hint_text = "Please fill in this box"
+            self.username_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+        
+        
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/login"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "username": username,
+            "password": ""
+        }
+
+        try:
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            
+            print("Sign-up successful!")
+            self.manager.current = 'forget_password_image' 
+            
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
+
 
     def go_to_home_screen(self, instance):
         """Kiểm tra đầu vào và chuyển đến trang Home nếu hợp lệ."""
@@ -186,7 +211,7 @@ class LoginImageScreen(Screen):
             response = requests.post(url, data=json.dumps(payload), headers=headers)
             if response.status_code == 200:
                 print("Sign-up successful!")
-                self.manager.current = 'home' # Nếu hợp lệ, chuyển sang màn hình confirm
+                self.manager.current = 'home' 
             else:
                 data = response.json()
                 print("Error:", data.get("message"))
