@@ -13,6 +13,8 @@ from kivy.core.image import Image as CoreImage
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy_garden.mapview import MapView, MapMarkerPopup
+import requests
+import json
 
 Window.clearcolor = (1, 1, 1, 1)
 
@@ -72,6 +74,7 @@ class MenuScreen(Screen):
         share = RelativeLayout(size_hint_x=None, width='30dp', height='30dp')
 
         share_button = Button(background_normal='', background_down='', background_color=(0, 0, 0, 0))
+        share_button.bind(on_press=self.share_location)
         
         img = Image(
             source = 'share_logo.png', 
@@ -190,4 +193,43 @@ class MenuScreen(Screen):
         place_name = instance.place_name
         screen_name = place_name.replace(' ', '').lower() + 'screen'
         self.manager.current = screen_name
+
+    def share_location(self, instance):
+        try:
+            response = requests.post("http://127.0.0.1:5000/share")  # hoặc IP backend thực tế
+            if response.status_code == 200:
+                data = response.json()
+                areas = data.get("areas", "Không có dữ liệu khu vực")
+                link = data.get("link", "Không có link")
+                print("Areas:", areas)
+                print("Google Maps link:", link)
+                # Optionally: mở link trên trình duyệt
+                import webbrowser
+                webbrowser.open(link)
+            else:
+                print("Lỗi khi gọi API:", response.status_code, response.text)
+        except Exception as e:
+            print("Lỗi kết nối backend:", e)
+
+
+    def get_location_to_backend(self, latitude, longitude, timestamp):
+        url = "http://127.0.0.1:5000/check-location"  
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "timestamp": timestamp
+        }
+
+        try:
+            response = requests.post(url, headers=headers, data=json.dumps(payload), cookies={'session': 'your-session-id'})
+            if response.status_code == 200:
+                result = response.json()
+                zone_name = result.get('name', 'Unknown')
+                print(f"You are in: {zone_name}")
+            else:
+                print(response.json().get('message', 'Something went wrong'))
+        except Exception as e:
+            print(f"Error sending location: {e}")
+
 
