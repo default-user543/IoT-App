@@ -16,7 +16,6 @@ from kivy_garden.mapview import MapView, MapMarkerPopup
 from kivy.utils import platform
 from plyer import gps
 import requests
-import requests
 import json
 
 
@@ -66,7 +65,7 @@ class MenuScreen(Screen):
 
         # Username
         self.name_label = Label(
-            text=f'Hello, {On_text}',
+            text=f'Hello, {On_text or "Guest"}',
             color=(0.694, 0.875, 0.980, 1),
             halign='left', 
             valign='middle'
@@ -162,18 +161,7 @@ class MenuScreen(Screen):
                 self.label1.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
                 self.add_widget(self.label1)
             
-                if text1.strip() != "":
-                    self.status_label = Label(
-                        text = "You are here",
-                        color = (1, 1, 1, 1),
-                        font_size = '14sp',
-                        italic = True,
-                        halign = 'left',
-                        valign = 'middle',
-                        padding = (15,0)
-                    )
-                    self.status_label.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
-                    self.add_widget(self.status_label)
+                
 
             def update_rect(self, *args):
                 self.rect.pos = self.pos
@@ -252,8 +240,10 @@ class MenuScreen(Screen):
                 result = response.json()
                 zone_name = result.get('name', 'Unknown')
                 print(f"You are in: {zone_name}")
+                self.update_scrollview_for_location(zone_name)
             else:
-                print(response.json().get('message', 'Something went wrong'))
+                print('Something went wrong')
+                self.update_scrollview_for_location("No zone found")
         except Exception as e:
             print(f"Error sending location: {e}")
 
@@ -325,11 +315,14 @@ class MenuScreen(Screen):
         scroll_view = self.children[0].children[0]  # truy cập ScrollView
         grid_layout = scroll_view.children[0]  # truy cập GridLayout
 
+        prioritized_buttons = []
+        other_buttons = []
+
         # Duyệt qua từng button để kiểm tra
-        for btn in grid_layout.children:
+        for btn in grid_layout.children[:]:
             if hasattr(btn, 'place_name'):
-                if btn.place_name == current_zone:
-                    btn.label1.text = current_zone
+                if btn.place_name.strip().lower() == current_zone.strip().lower():
+                    btn.label1.text = btn.place_name
                     # Thêm label "You are here" nếu chưa có
                     if not hasattr(btn, 'status_label'):
                         status_label = Label(
@@ -337,24 +330,27 @@ class MenuScreen(Screen):
                             color=(1, 1, 1, 1),
                             font_size='14sp',
                             italic=True,
-                            halign='left',
+                            halign='right',
                             valign='middle',
+                            size_hint_x=None,
                             padding=(15, 0)
                         )
                         status_label.bind(size=lambda instance, value: setattr(instance, 'text_size', value))
                         btn.add_widget(status_label)
                         btn.status_label = status_label
+                    prioritized_buttons.append(btn)  
                 else:
                     # Ẩn label nếu không phải vị trí hiện tại
                     if hasattr(btn, 'status_label'):
                         btn.remove_widget(btn.status_label)
                         del btn.status_label
+                    other_buttons.append(btn)
 
-        # Đưa nút đang đứng lên đầu danh sách
-        for btn in grid_layout.children[:]:
-            if hasattr(btn, 'place_name') and btn.place_name == current_zone:
-                grid_layout.remove_widget(btn)
-                grid_layout.add_widget(btn, index=len(grid_layout.children))  
+        # Làm mới lại layout (xóa tất cả → thêm lại theo thứ tự)
+        grid_layout.clear_widgets()
+        for btn in prioritized_buttons + other_buttons:
+            grid_layout.add_widget(btn)
+        
 
 
 
