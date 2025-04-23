@@ -83,13 +83,7 @@ def signup():
     user_data = {
         'username': username,
         'password': hashed_password,
-        'forget_password': {
-            'city': '',
-            'fav_color': '',
-            'fav_pet': '',
-            'country': '',
-            'language': '',
-        }
+        'forget_password': {}
     }
     
     ref.update(user_data)
@@ -165,67 +159,66 @@ def login():
 @app.route('/user-information', methods=['POST'])
 def user_information():
     data = request.get_json()
+    users_ref = db.reference('users')
+    
     if 'username' not in session:
         return jsonify({"message": "Please login or sign up!", "a": 9})
+    
     username=session['username']
-    required_fields = ["city", "fav_colour", "fav_pet", "country", "language"]
-
-    if not all(field in data and data[field] for field in required_fields):
-        return jsonify({"message": "Missing required information!", "a": 6}), 400
-
-    message, code = check_name(username)
-    if code != 0:
-        return jsonify({'message': message, 'a': code}), 400
-
-    users_ref = db.reference(f'users')
     user_key, user_data = find_user_by_username(username)
+    required_fields = ["city", "fav_colour", "fav_pet", "country", "language"]
+    input_keys = [key for key in data if key in required_fields]
 
-    if not user_data:
-        return jsonify({"message": "User not found!", "a": 8}), 404
+    if len(input_keys) != 1:
+        return jsonify({"message": "Please provide only one field to update!"}), 400
 
-    users_ref.child(user_key).update({
-        "forget_password": {
-            "city": data["city"],
-            "fav_colour": data["fav_colour"],
-            "fav_pet": data["fav_pet"],
-            "country": data["country"],
-            "language": data["language"]
-        }
-    })
+    key = input_keys[0]
+    value = data[key]
+    if not value:
+        return jsonify({"message": "Please provide a value!", "a": 6}), 400
+    
+    hashed_value = hash_password(value)
+    users_ref.child(user_key).update({"forget_password": {key: hashed_value}})
 
     return jsonify({"message": "Information updated successfully!", "a": 0}), 200
 
 @app.route('/forgot-password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
-    required_fields = ["city", "fav_colour", "fav_pet", "country", "language", "reset_password"]
-    if "username" not in session:
+    users_ref = db.reference('users')
+    if 'username' not in session:
         return jsonify({"message": "Please login or sign up!", "a": 9})
     username = session['username']
+    new_password = data.get('reset_password')
 
-    if not all(field in data and data[field] for field in required_fields):
-        return jsonify({"message": "Missing required information!", "a": 6}), 400
-    
+    if not username or not new_password:
+        return jsonify({"message": "Thiếu tên người dùng hoặc mật khẩu mới!", "a": 6}), 400
+
     user_key, user_data = find_user_by_username(username)
-    users_ref = db.reference('users')
-
     if not user_data:
-        return jsonify({"message": "User not found!", "a": 8}), 404
+        return jsonify({"message": "Không tìm thấy người dùng!", "a": 8}), 404
 
-    forgot_info = user_data.get("forget_password", {})
-    for field in ["city", "fav_colour", "fav_pet", "country", "language"]:
-        if forgot_info.get(field) != data.get(field):
-            return jsonify({"message": "Information does not match our records!", "a": 8}), 401
+    forget_info = user_data.get("forget_password", {})
+    allowed_keys = ["city", "fav_colour", "fav_pet", "country", "language"]
+    input_keys = [key for key in data if key in allowed_keys]
 
-    new_password = data["reset_password"]
+    if len(input_keys) != 1:
+        return jsonify({"message": "Vui lòng cung cấp chính xác một thông tin bảo mật!", "a": 6}), 400
+
+    key = input_keys[0]
+    user_answer = data[key]
+
+    if key not in forget_info or not bcrypt.checkpw(user_answer.encode(), forget_info[key].encode()):
+        return jsonify({"message": "Thông tin bảo mật không trùng khớp!", "a": 9}), 401
+
     message, code = check_password(new_password)
     if code != 0:
-        return jsonify({'message': message, 'a': code}), 400
+        return jsonify({"message": message, "a": code}), 400
 
     new_hashed = hash_password(new_password)
     users_ref.child(user_key).update({"password": new_hashed})
 
-    return jsonify({"message": "Password reset successful!", "a": 0}), 200
+    return jsonify({"message": "Đặt lại mật khẩu thành công!", "a": 0}), 200
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -271,6 +264,7 @@ def share():
         result += data[i]
         if i != len(data) - 1:
             result += ' -> '
+    ref.delete()
     return jsonify({'areas': result, "link": maps})
 
 @app.route("/test", methods = ["POST"])
