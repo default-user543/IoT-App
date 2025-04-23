@@ -2,23 +2,40 @@
 
 - Show the information about locations of VGU.
 - Share the route of user.
-- Show the current position of user.
+- Show the current position of user by using Kivy Map.
+- Show the notification whenever the user is in a area of the location
+  - The list of locations: Academic Cluster 1, Academic Cluster 2, Academic Cluster 5, Academic Cluster 6, Admin Building, Ceremony Hall, Dorm 1, Dorm 2, Lecture Hall, Library, Sports Hall, University Guest Houses.
 
 ### Technologies and related-libraries:
 
 - Frontend: Kivy
-- Backend: Flask, Flask-Session, Flask-CORS
+- Backend: Flask,
 - Database: Firebase Admin SDK (Firebase Real-time Database)
-- Ecryption: Bcrypt
+- Ecryption: Bcrypt => Encrypt the password to make server more secured.
 - Geometric and coordinate processing: Shapely (Polygon-Approach)
 - Real-time: Datetime
 - API's communication and feature Google Maps API: urllib.parse
+- Deploy the Server Host: Ngrok (HTTPs) => Make the server more secured.
+- Package the .apk app: Buildozer
+- Send the GPS of devices using Android Permission: plyer
+- Session Management: Flask-Session, Flask-CORS (Backend Server).
+
+### User guide:
+
+- Step 1: Host a server by using Google Cloud, Ngrok (For free), etc.
+- Step 2: Set the database following our database in folder 'database' or README.md
+- Step 3: Install the .apk app of the application
+- Step 4: Change the link of the API server (backend) in your Kivy's app source code.
+- Step 5: Run the Kivy's app and enjoy!
+
+  **Note that in this concept we will host by Ngrok and the link will be just used one time and have to be set again each time it run.**
 
 ---
 
 ### The API is used in the project:
 
-- Google Maps API for sharing route of user, showing the current position of user (Frontend).
+- Kivy's Map for showing the current position of user.
+- Google Maps Platform and APIs for showing the route of user (based on the start point and the end point).
 
 ### The Structure of Database: Note that we use Firebase Real-time Database! Some of our data will be contained in unique keys because we use push or {}.
 
@@ -138,14 +155,12 @@
   "users":{
     "username-of-the-user": {
       "History_GPS": {
-        {"lat": "...", "lng": "..."},
+        {"lat": "...", "lng": "..."}, // The data will be sent continously to the server.
       },
-      "forget_password": {
+      "forget_password": { // Note that: User just need to answer one of these things. So in Database there is just one of them.
         "city": "...",
-        "country": "...",
         "fav_color": "...",
         "fav_pet": "...",
-        "language": "..."
       },
       "password": "password-after-ecrypting-by-hashed",
       "username": "the-username-of-the-user",
@@ -154,9 +169,9 @@
 }
 ```
 
-### Giai đoạn 1: Build các giao diện đăng nhập:
+## Part 1: Authentication Part: Note that if the user enters the username, it will be saved automatically to the Flask Session whether they enter password or not!
 
-### Quy ước về cách trả về của Backend, backend trả về một file JSON có cấu trúc như sau:
+### Convention for Backend Response Format:
 
 ```json
 {
@@ -165,7 +180,7 @@
 }
 ```
 
-### Quy ước của biến a:
+### Quy ước của biến a (Conventions of Errors & Sucessful):
 
 - 0 là đăng nhập thành công
 - 1 là username phải từ 6-20 ký tự
@@ -179,9 +194,9 @@
 - 9 là người dùng chưa đăng nhập hoặc chưa đăng ký.
 - 10 là không lấy được GPS của người dùng.
 
-#### Tính năng sign up: http://127.0.0.1:5000/sign-up (Done)
+#### Sign Up: http://127.0.0.1:5000/sign-up:
 
-- **Input data**: Frontend sẽ gửi một file JSON như bên dưới theo phương thức POST:
+- **Input data**: Frontend will send a JSON data with method POST:
 
 ```json
 {
@@ -191,11 +206,16 @@
 }
 ```
 
-- **Output data**: Backend trả về một file JSON như quy ước.
+- **Operation**:
 
-#### Tính năng log in: http://127.0.0.1:5000/login (Not done):
+  - Backend server will consider whether the data is wrong or missing (Validation Rules below).
+  - If anything is alright, the password will be encrypted by Bcrypt and send to the DataBase.
 
-- **Input data**: Frontend sẽ gửi một file JSON như bên dưới theo phương thức POST:
+- **Output data**: Backend will send a JSON file as the conventions.
+
+#### Login: http://127.0.0.1:5000/login :
+
+- **Input data**: Frontend will send a JSON data with method POST:
 
 ```json
 {
@@ -204,38 +224,38 @@
 }
 ```
 
-- **Cách hoạt động**:
-  - Backend nhận file JSON chứa 2 data như trên.
-  - Backend dùng phương thức hashed để mã hoá mật khẩu người dùng nhập vào và dùng thuật toán để thực hiện tính năng log in.
-- **Output data**: Backend trả về một file JSON như quy ước.
+- **Operation**:
 
-#### Tính năng thông tin cụ thể người dùng: http://127.0.0.1:5000/user-information (Not done)
+  - Backend will consider whether the data is wrong, missing following the conventions about errors (Validation Rules below).
+  - If anything is alright, Backend server will compare the information with the users' data.
 
-- **Input data**: Frontend sẽ gửi một file JSON theo methods POST như dưới:
+- **Output data**: Backend Server will send a JSON data following the Conventions.
+
+#### User Information For Authentication: http://127.0.0.1:5000/user-information
+
+- **Input data**: Frontend will send a JSON data with method POST.
+
+- **Note**: The Frontend Server just send one of these things! (Note that the information will be encrypted).
 
 ```json
 {
   "city": "...",
   "fav_colour": "...",
-  "fav_pet": "...",
-  "country": "...",
-  "language": "..."
+  "fav_pet": "..."
 }
 ```
 
-- **Cách hoạt động**:
-  - Backend sẽ check xem thông tin nhập vào có hợp với luật hoặc thiếu không.
-  - Backend sẽ update các thông tin vào trong phần "forgot_password" trong Firebase Real-time Database.
-- **Output data**: Backend trả về một file JSON như quy ước.
+- **Operation**:
+  - Backend will receive information and store it to the database.
+- **Output data**: Backend will send a JSON file following the convention.
 
-#### Tính năng khi người dùng quên mật khẩu: http://127.0.0.1:5000/forgot_password (Not done)
+#### Forgot Password: http://127.0.0.1:5000/forgot_password
 
-- **Input data**: Frontend sẽ gửi file JSON giống như phần trên nhưng có thêm key resert_password.
-- **Cách thức hoạt động**:
-  - Backend sẽ check xem thông tin nhập vào có hợp với luật hoặc thiếu không.
-  - Backend sẽ xem xét xem các user-information có trùng khớp trong cơ sở dữ liệu không.
-  - Nếu trùng khớp thì mới đổi password của người dùng (Nhớ mã hoá theo phương thức hashed rồi mới up lên database)
-- **Output data**: Backend trả về một file JSON nhưu theo quy ước.
+- **Input data**: Frontend will send the JSON file as the previous part but with 'reset_password'
+- **Operation**:
+  - Backend will check whether the reset_password is correct following the Validdation Rules or not!
+  - Backend server will compare the information (after encryption) to the Database, if it's true => Change the password
+- **Output data**: Backend will send a JSON data as the Conventions!
 
 ### Validation Rules:
 
@@ -249,11 +269,11 @@
 
 ---
 
-### Giai đoạn 2: Build tính năng liên quan đến GPS:
+## Part 2: GPS-related Functionalities:
 
-#### Tính năng khi người dùng bước vào một vùng định sẵn thì thông báo: http://127.0.0.1:5000/check-location
+#### Check Zones and Save the Information: http://127.0.0.1:5000/check-location
 
-- **Input data**: Frontend sẽ gửi một file JSON chứa thông tin vị trí của người dùng như sau:
+- **Input data**: Frontend will send JSON data about the user's GPS by using pypler:
 
 ```json
 {
@@ -262,9 +282,11 @@
 }
 ```
 
-- **Cách thức hoạt động**: Sử dụng các thuật toán liên quan đến Polygon-based để xác định vị trí của người dùng so với vùng polygon đã định sẵn trong database.
-
-- **Output data**: Backend trả về một file JSON như sau:
+- **Operation**:
+  - Backend will check if the data is missing or not.
+  - Backend will use Ray-Casting Algorithm to determine whether the user is in the area or not!
+  - Backend will save the GPS data of user automatically to the Database.
+- **Output data**: Backend will return a JSON data like this:
 
 ```json
 {
@@ -275,12 +297,17 @@
 
 ---
 
-#### Tính năng chia sẻ lộ trình của người dùng: http://127.0.0.1:5000/share
-
+#### Share routes: http://127.0.0.1:5000/share
+*Note that after the sharing, all the history data of user will be deleted.
 - **Input data**: Frontend gửi một method POST đến Backend Server.
-- **Cách thức hoạt động**: Frontend phải trả về hai thứ:
-  - Link Google Maps mà khi người dùng bấm vào hiện lộ trình theo điểm bắt đầu và điểm kết thúc.
-  - Các khu vực cụ thể mà người dùng đã đi qua.
+- **Operation**:
+  - **Regarding the Google Maps link:**
+    - The algorithm in the **Backend** will generate a link to the Google Maps platform based on the starting and ending GPS coordinates stored in the **Database**.
+    - When the user clicks on the link → They are redirected to **Google Maps**.
+  - **Regarding the zones the user has passed through:**
+    - The **Backend** will use nested loops to check which zones the user has passed through:
+      - If the zone is a duplicate, it will be **skipped**.
+      - If the zone is not a duplicate, it will be **returned to the Frontend** for processing.
 - **Output data**: Backend trả về một file JSON nhưu sau:
 
 ```json
