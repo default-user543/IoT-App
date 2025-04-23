@@ -16,7 +16,7 @@
 - Real-time: Datetime
 - API's communication and feature Google Maps API: urllib.parse
 - Deploy the Server Host: Ngrok (HTTPs) => Make the server more secured.
-- Package the .apk app: Buildozer
+- Package the .apk app: Buildozer, Ubuntu.
 - Send the GPS of devices using Android Permission: plyer
 - Session Management: Flask-Session, Flask-CORS (Backend Server).
 
