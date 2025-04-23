@@ -7,6 +7,15 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.graphics import Color, RoundedRectangle
 
+# frontend/api.py
+
+import requests
+import json
+
+BASE_URL = "http://127.0.0.1:5000"
+
+
+
 class LoginImageScreen(Screen):
     def __init__(self, **kwargs):
         super(LoginImageScreen, self).__init__(**kwargs)
@@ -164,6 +173,22 @@ class LoginImageScreen(Screen):
             self.password_input.children[0].hint_text = "Please fill in this box"
             self.password_input.children[0].hint_text_color = (1, 0, 0, 1)
             return
+        
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/login"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "username": username,
+            "password": password
+        }
 
-        # Nếu hợp lệ, chuyển đến trang Home
-        self.manager.current = 'home'
+        try:
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Sign-up successful!")
+                self.manager.current = 'home' # Nếu hợp lệ, chuyển sang màn hình confirm
+            else:
+                data = response.json()
+                print("Error:", data.get("message"))
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
