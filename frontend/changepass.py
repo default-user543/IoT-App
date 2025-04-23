@@ -8,6 +8,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, RoundedRectangle
 from kivy.core.window import Window
+import requests
+import json
 
 # Thiết lập màu nền cho ứng dụng
 Window.clearcolor = (1, 1, 1, 1)  # Màu trắng
@@ -38,9 +40,9 @@ class ChangepwImageScreen(Screen):
         )
 
         # Tạo khung nhập liệu cho "User's name"
-        self.password_input = self.create_rounded_input("New Password")
+        self.password_input = self.create_rounded_input("New Password", password = True)
         # Tạo khung nhập liệu cho "Keyword"
-        self.confirm_password_input = self.create_rounded_input("Confirm Password")
+        self.confirm_password_input = self.create_rounded_input("Confirm Password", password = True)
 
         # Thêm các khung nhập liệu vào BoxLayout
         self.input_layout.add_widget(self.password_input)
@@ -174,5 +176,43 @@ class ChangepwScreen(Screen):
         self.add_widget(layout)
 
     def go_back_to_main(self, instance):
-        # Quay lại màn hình chính
-        self.manager.current = 'main'
+        """Kiểm tra đầu vào và hiển thị lỗi nếu cần."""
+        username = self.username_input.children[0].text.strip()
+        password = self.password_input.children[0].text.strip()
+        confirm_password = self.confirm_password_input.children[0].text.strip()
+
+        # Kiểm tra nếu các trường bị bỏ trống        
+        if not password:
+            self.password_input.children[0].hint_text = "Please fill in this box"
+            self.password_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+        if not confirm_password:
+            self.confirm_password_input.children[0].hint_text = "Please fill in this box"
+            self.confirm_password_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+    
+
+        # Kiểm tra nếu mật khẩu không khớp
+        if password != confirm_password:
+            self.confirm_password_input.children[0].hint_text = "Confirm wrong"
+            self.confirm_password_input.children[0].hint_text_color = (1, 0, 0, 1)
+            return
+        
+        # Gửi request tới backend
+        url = "http://127.0.0.1:5000/forgot-password"
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "new_password": password
+        }
+
+        try:
+            response = requests.post(url, data=json.dumps(payload), headers=headers)
+            if response.status_code == 200:
+                print("Sign-up successful!")
+                self.manager.current = 'main' # Nếu hợp lệ, chuyển sang màn hình confirm
+            else:
+                data = response.json()
+                print("Error:", data.get("message"))
+        except requests.exceptions.RequestException as e:
+            print("Failed to connect to backend:", e)
+
