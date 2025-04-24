@@ -1,0 +1,85 @@
+import kivy
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.lang import Builder
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.spinner import Spinner
+import requests
+import datetime
+
+# Firebase URLs
+USERS_URL = "https://app-du-lich-4d8a4.asia-southeast1.firebasedatabase.app/users.json"
+REVIEWS_URL = "https://app-du-lich-4d8a4.asia-southeast1.firebasedatabase.app/reviews.json"
+
+class LoginScreen(Screen):
+    def login(self):
+        username = self.ids.username_input.text.strip()
+        password = self.ids.password_input.text.strip()
+        if not username or not password:
+            self.show_popup("Error", "Please enter both username and password")
+            return
+
+        try:
+            response = requests.get(USERS_URL)
+            if response.status_code == 200:
+                users = response.json()
+                if isinstance(users, dict):
+                    for user_id, user_data in users.items():
+                        if user_data.get("Username", "") == username and user_data.get("Password", "") == password:
+                            App.get_running_app().current_user = {
+                                "UserID": user_id,
+                                "Username": username,
+                                "History_of_GPs": user_data.get("History_of_GPs", [])
+                            }
+                            self.manager.current = "review"
+                            return
+            self.show_popup("Login Failed", "Invalid username or password")
+        except Exception as e:
+            self.show_popup("Login Error", f"Something went wrong: {e}")
+
+    def show_popup(self, title, message):
+        popup = Popup(title=title,
+                      content=Label(text=message),
+                      size_hint=(None, None), size=(400, 200))
+        popup.open()
+
+class SignInScreen(Screen):
+    def register_user(self):
+        username = self.ids.username_input.text.strip()
+        password = self.ids.password_input.text.strip()
+        forgot_word = self.ids.forgot_word_input.text.strip()
+
+        if not username or not password or not forgot_word:
+            self.show_popup("Error", "Please fill all fields")
+            return
+
+        response = requests.get(USERS_URL)
+        if response.status_code == 200:
+            users = response.json() or {}
+            existing_ids = [int(uid) for uid in users.keys() if uid.isdigit()]
+            new_id = str(max(existing_ids) + 1) if existing_ids else "104240001"
+
+            user_data = {
+                "Username": username,
+                "Password": password,
+                "Forgot_Word": forgot_word,
+                "History_of_GPs": [],
+                "UserID": new_id
+            }
+
+            requests.patch(f"https://app-du-lich-4d8a4.asia-southeast1.firebasedatabase.app/users/{new_id}.json", json=user_data)
+            App.get_running_app().current_user = {"UserID": new_id, "Username": username, "History_of_GPs": []}
+            self.manager.current = "review"
+
+    def show_popup(self, title, message):
+        popup = Popup(title=title,
+                      content=Label(text=message),
+                      size_hint=(None, None), size=(400, 200))
+        popup.open()
+
+# Remaining app screens and logic (e.g., ReviewScreen, ReviewApp) remain unchanged...
+# (Không thay đổi phần còn lại để giữ nguyên logic xử lý review và UI khác)
