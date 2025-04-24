@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+google-services.json
+.env
+*.apk
+*.keystore
+firebaseConfig.json
