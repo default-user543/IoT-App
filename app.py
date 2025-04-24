@@ -11,7 +11,7 @@ def backend():
     print("Backend started")
 
 def frontend():
-    path = os.path.join(BASE_DIR, "frontend", "run.py")
+    path = os.path.join(BASE_DIR, "frontend", "main.py")
     os.system(f'python "{path}"')
 
 if __name__ == '__main__':

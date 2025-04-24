@@ -6,7 +6,7 @@ from kivy.core.window import Window
 Window.clearcolor = (1, 1, 1, 1)  # White background
 
 # Import screens
-from main import MainScreen
+from mainscreen import MainScreen
 from login import LoginImageScreen  # Chỉ import LoginImageScreen
 from signin import SignInImageScreen
 from forgetpass import ForgetpwImageScreen  # Chỉ import ForgetpwImageScreen
