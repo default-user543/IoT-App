@@ -12,8 +12,11 @@ from ceremonyhallscreen import CeremonyHallScreen
 from administrationbuildingscreen import AdministrationBuildingScreen
 from sporthallscreen import SportHallScreen
 from academicvillagescreen import AcademicVillageScreen
+import requests
+
 class TiNaApp(App):
     def build(self):
+        self.session = requests.Session()
         # Tạo ScreenManager để quản lý các màn hình
         screen_manager = ScreenManager()
 

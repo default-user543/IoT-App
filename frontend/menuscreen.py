@@ -13,6 +13,9 @@ from kivy.core.image import Image as CoreImage
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy_garden.mapview import MapView, MapMarkerPopup
+from time import time
+from kivy.clock import Clock
+from arduino_api import refresh_access_token
 from kivy.utils import platform
 from plyer import gps
 import requests
@@ -21,8 +24,27 @@ import json
 
 Window.clearcolor = (1, 1, 1, 1)
 
+def get_gps_from_arduino_cloud():
+        access_token = refresh_access_token()
+        thing_id = "9a693599-ed8e-47e5-bd45-996133fcb43e"
+        lat_prop_id = "9012aace-61af-4d5a-a2aa-1e2eb8b86df4"
+        lon_prop_id = "9012aace-61af-4d5a-a2aa-1e2eb8b86df4"
+
+        headers = {"Authorization": f"Bearer {access_token}"}
+        url = "https://api2.arduino.cc/iot/v2/things/9a693599-ed8e-47e5-bd45-996133fcb43e/properties/1d80c112-abe5-4725-940e-7a83bd93b71a/lastvalue"
+        res = requests.get(url, headers=headers)
+        if res.status_code == 200:
+            value = res.json()["value"]  # ví dụ: "11.10876,106.61475"
+            lat, lon = map(float, value.split(","))
+            return lat, lon
+
+        else: 
+            print("❌ Lỗi lấy tọa độ:", res.status_code, res.text)
+            return None, None
+
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
+        Clock.schedule_interval(lambda dt: self.loc_getter.get_location(), 10)  # mỗi 10s
         super(MenuScreen, self).__init__(**kwargs)
 
 
@@ -114,13 +136,32 @@ class MenuScreen(Screen):
         map_container = BoxLayout(padding=(10, 10), size_hint_y=None, height='410dp')  # có padding
         main_layout.add_widget(map_container)
 
-        
+        try:
+            lat, lon = get_gps_from_arduino_cloud()
+        except Exception as e:
+            print("❌ Lỗi gửi backend:", e)
+            lat, lon = 10.762622, 106.660172  # mặc định
 
-        self.mapview = MapView(zoom=17, lat=11.108766932780382, lon=106.61475735229159)  
-        marker = MapMarkerPopup(lat=11.108766932780382, lon=106.61475735229159)
-        self.mapview.add_widget(marker)
+
+        self.mapview = MapView(zoom=17, lat=lat, lon=lon) 
+
+        
+        if hasattr(self, 'current_marker'):
+            self.mapview.remove_widget(self.current_marker)
+        self.current_marker = MapMarkerPopup(lat=lat, lon=lon)
+        self.mapview.add_widget(self.current_marker)
+
+
+        self.mapview = MapView(zoom=17, lat=lat, lon=lon)  
+        
+         
 
         map_container.add_widget(self.mapview)
+        if hasattr(self, 'loc_getter'):
+            Clock.schedule_interval(lambda dt: self.loc_getter.get_location(), 10)
+        else:
+            print("⚠️ LocationGetter chưa sẵn sàng.")
+
 
         self.loc_getter = LocationGetter(self.mapview)
         self.loc_getter.get_location()
@@ -350,66 +391,73 @@ class MenuScreen(Screen):
         grid_layout.clear_widgets()
         for btn in prioritized_buttons + other_buttons:
             grid_layout.add_widget(btn)
+
+    def get_gps_location(self):
+        token = refresh_access_token()
+        if not token:
+            print("🚫 Không lấy được token")
+            return
+
+        headers = {"Authorization": f"Bearer {token}"}
+        thing_id = "9a693599-ed8e-47e5-bd45-996133fcb43e"
+        property_id = "9a693599-ed8e-47e5-bd45-996133fcb43e"
+        url = f"https://api2.arduino.cc/iot/v2/things/{thing_id}/properties/{property_id}/value"
+
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            value = response.json().get("value")
+            print("📍 GPS từ Arduino:", value)
+            # Ở đây bạn có thể update UI với giá trị GPS
+        else:
+            print("❌ Lỗi lấy dữ liệu:", response.status_code, response.text)
+
+
+
         
 
 
 
 class LocationGetter:
     def __init__(self, mapview):
+        
         self.mapview = mapview
         self.location = None
         self.current_marker = None  # Ban đầu chưa có marker
 
+    
+
     def get_location(self):
-        if platform == 'android':
-            self.get_android_location()
-        else:
-            self.get_ip_location()
-
-    def get_android_location(self):
-        try:
-            gps.configure(on_location=self.on_location, on_status=self.on_status)
-            gps.start(minTime=1000, minDistance=1)
-        except NotImplementedError:
-            print("GPS không khả dụng trên thiết bị này.")
-
-    def on_location(self, **kwargs):
-        lat = kwargs.get('lat')
-        lon = kwargs.get('lon')
-        print(f"📍 Vị trí hiện tại: {lat}, {lon}")
-
-        if self.current_marker:
-            self.mapview.remove_widget(self.current_marker)
-
-        self.current_marker = MapMarkerPopup(lat=lat, lon=lon)
-        self.mapview.add_widget(self.current_marker)
-        self.mapview.center_on(lat, lon)
-
-        from time import time
-        self.send_location_to_backend(lat, lon, time())
-
-    def on_status(self, stype, status):
-        print("📶 GPS Status:", stype, status)
-
-    def get_ip_location(self):
-        
-        try:
-            res = requests.get("https://ipinfo.io/json")
-            data = res.json()
-            lat, lon = map(float, data['loc'].split(','))
-            print("🌍 IP-based location:", lat, lon)
-
+        latitude, longitude = get_gps_from_arduino_cloud()
+        if latitude and longitude:
+            print(f"📡 Tọa độ từ Arduino Cloud: {latitude}, {longitude}")
             if self.current_marker:
                 self.mapview.remove_widget(self.current_marker)
 
-            self.current_marker = MapMarkerPopup(lat=lat, lon=lon)
+            self.current_marker = MapMarkerPopup(lat=latitude, lon=longitude)
             self.mapview.add_widget(self.current_marker)
-            self.mapview.center_on(lat, lon)
+            self.mapview.center_on(latitude, longitude)
 
-            from time import time
-            self.send_location_to_backend(lat, lon, time())
+            self.send_location_to_backend(latitude, longitude, time())
+        else:
+            print("Không thể lấy tọa độ từ Arduino Cloud")
 
+    def send_location_to_backend(self, latitude, longitude, timestamp):
+        url = "http://127.0.0.1:5000/check-location"  
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "timestamp": timestamp
+        }
+
+        try:
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            if response.status_code == 200:
+                result = response.json()
+                zone_name = result.get('name', 'Unknown')
+                print(f"✅ Đang ở khu vực: {zone_name}")
+            else:
+                print("❌ Gửi không thành công:", response.status_code)
         except Exception as e:
-            print("Lỗi IP định vị:", e)
-
+            print("❌ Lỗi gửi backend:", e)
 

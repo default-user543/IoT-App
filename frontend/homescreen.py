@@ -65,6 +65,7 @@ class HomeScreen(Screen):
             self.manager.current = 'menu'
         except Exception as e:
             print("No username found!")
+            self.manager.current = 'menu'
     
     def go_back_to_login(self, instance):
         self.manager.current = 'login_image' #đi đến login.py
